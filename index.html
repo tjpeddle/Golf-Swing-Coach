@@ -93,6 +93,21 @@
     color: var(--gold);
   }
 
+  .nav-ask-btn {
+    background: rgba(200,168,75,0.15);
+    border: 1px solid rgba(200,168,75,0.3);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    min-height: 32px;
+    transition: all 0.2s;
+  }
+  .nav-ask-btn:hover { background: rgba(200,168,75,0.25); }
+
   .nav-phase {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -1701,6 +1716,32 @@
     .hero-header { grid-template-columns: 1fr; }
   }
 
+  .drill-coach-btn {
+    background: rgba(200,168,75,0.12);
+    border: 1px solid rgba(200,168,75,0.35);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-left: 8px;
+  }
+  .drill-coach-btn:hover, .drill-coach-btn:active {
+    background: rgba(200,168,75,0.25);
+    border-color: var(--gold);
+  }
+
   /* ── COACH DRAWER ── */
   .info-btn {
     background: none;
@@ -1933,7 +1974,7 @@
     <button class="nav-tab" onclick="showPage('progress')">Progress</button>
     <button class="nav-tab" onclick="showPage('science')">Science</button>
   </div>
-  <div class="nav-phase">Phase <span id="nav-phase-num">1</span> · Wk <span id="nav-week-num">1</span> &nbsp;<button onclick="openCoach('Ask the Coach', 'The golfer wants to ask you something directly. Greet them briefly as the world\'s number one coach would — with authority and warmth — then invite their question in one sentence.')" style="background:rgba(200,168,75,0.15);border:1px solid rgba(200,168,75,0.3);color:var(--gold);font-family:\'DM Mono\',monospace;font-size:8px;padding:3px 8px;border-radius:3px;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s;" onmouseover="this.style.background=\'rgba(200,168,75,0.25)\'" onmouseout="this.style.background=\'rgba(200,168,75,0.15)\'">ASK</button></div>
+  <div class="nav-phase">Ph <span id="nav-phase-num">1</span> W<span id="nav-week-num">1</span> <button id="nav-ask-btn" class="nav-ask-btn">ASK</button></div>
 </nav>
 
 <main>
@@ -2557,21 +2598,54 @@ function renderDrills() {
     const done = todayDone.includes(d.id);
     const li = document.createElement('li');
     li.className = 'drill-item' + (done ? ' done' : '');
-    li.innerHTML = `
-      <div class="drill-check"></div>
-      <div style="flex:1">
-        <div class="drill-name">
-          ${d.name}
-          <button class="info-btn" title="Explain this drill" onclick="event.stopPropagation(); openCoach('${d.name}', ${JSON.stringify(DRILL_CONTEXTS[d.id] || null)})">?</button>
-        </div>
-        <div class="drill-desc">${d.desc}</div>
-      </div>
-      <div class="drill-reps">${d.reps}</div>
-    `;
-    li.onclick = (e) => { if (!e.target.classList.contains('info-btn')) toggleDrill(d.id); };
+
+    // Build the element safely — no inline JSON, no inline handlers with special chars
+    const checkDiv = document.createElement('div');
+    checkDiv.className = 'drill-check';
+
+    const textDiv = document.createElement('div');
+    textDiv.style.flex = '1';
+
+    const nameRow = document.createElement('div');
+    nameRow.className = 'drill-name';
+    nameRow.textContent = d.name;
+
+    const descDiv = document.createElement('div');
+    descDiv.className = 'drill-desc';
+    descDiv.textContent = d.desc;
+
+    textDiv.appendChild(nameRow);
+    textDiv.appendChild(descDiv);
+
+    const repsDiv = document.createElement('div');
+    repsDiv.className = 'drill-reps';
+    repsDiv.textContent = d.reps;
+
+    // Coach button — large tap target
+    const coachBtn = document.createElement('button');
+    coachBtn.className = 'drill-coach-btn';
+    coachBtn.textContent = 'Ask Coach';
+    coachBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const ctx = DRILL_CONTEXTS[d.id] || ('Explain the ' + d.name + ' drill for golf swing change. What is it, why does it work neurologically, and how do I do it correctly?');
+      openCoach(d.name, ctx);
+    });
+
+    li.appendChild(checkDiv);
+    li.appendChild(textDiv);
+    li.appendChild(repsDiv);
+    li.appendChild(coachBtn);
+
+    // Tap drill body = toggle done
+    li.addEventListener('click', function(e) {
+      if (e.target === coachBtn || coachBtn.contains(e.target)) return;
+      toggleDrill(d.id);
+    });
+
     list.appendChild(li);
   });
 }
+
 
 function toggleDrill(id) {
   const key = todayKey();
@@ -2852,16 +2926,29 @@ function renderScience() {
   SCIENCE_CARDS.forEach(c => {
     const div = document.createElement('div');
     div.className = 'principle-card';
-    div.innerHTML = `
-      <div class="principle-name">
-        ${c.name}
-        <button class="info-btn" title="Ask the coach about this" onclick="openCoach('${c.name}', 'Explain ${c.name} in the context of my golf swing change program. Go deeper than the summary — give me the full picture of what this means for how I should practice and play.')">?</button>
-      </div>
-      <div class="principle-text">${c.text}</div>
-    `;
+
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'principle-name';
+    nameDiv.textContent = c.name;
+
+    const coachBtn = document.createElement('button');
+    coachBtn.className = 'drill-coach-btn';
+    coachBtn.textContent = 'Ask Coach';
+    coachBtn.addEventListener('click', function() {
+      openCoach(c.name, 'Explain ' + c.name + ' in the context of my golf swing change program. Go deeper than the summary — give me the full picture of what this means for how I should practice and play.');
+    });
+    nameDiv.appendChild(coachBtn);
+
+    const textDiv = document.createElement('div');
+    textDiv.className = 'principle-text';
+    textDiv.innerHTML = c.text;
+
+    div.appendChild(nameDiv);
+    div.appendChild(textDiv);
     container.appendChild(div);
   });
 }
+
 
 // ── LOG SESSION MODAL ─────────────────────────────────────────────────────
 function openModal() {
@@ -3493,6 +3580,23 @@ function resetAnalysis() {
 document.addEventListener('DOMContentLoaded', function() {
   renderDashboard();
   setReadMode('cold');
+
+  // Nav ASK button
+  const askBtn = document.getElementById('nav-ask-btn');
+  if (askBtn) {
+    askBtn.addEventListener('click', function() {
+      openCoach('Ask the Coach', 'The golfer wants to ask you something. Greet them briefly as the world\'s number one coach — with authority and warmth — then invite their question.');
+    });
+  }
+
+  // Plateau banner info button
+  const plateauBtn = document.querySelector('#plateau-banner .info-btn');
+  if (plateauBtn) {
+    plateauBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      openCoach('The Plateau Zone', SECTION_CONTEXTS['plateau']);
+    });
+  }
 });
 </script>
 </body>
