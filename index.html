@@ -78,10 +78,10 @@
     border: none;
     color: var(--muted);
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.1em;
+    font-size: 9px;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    padding: 6px 14px;
+    padding: 5px 8px;
     cursor: pointer;
     border-radius: 3px;
     transition: all 0.2s;
@@ -1743,232 +1743,155 @@
   }
 
   /* ── COACH DRAWER ── */
-  .info-btn {
-    background: none;
-    border: 1px solid rgba(200,168,75,0.25);
-    color: var(--gold);
+  
+  .info-btn { display: none; }
+
+  .drill-coach-btn {
+    background: rgba(200,168,75,0.12);
+    border: 1px solid rgba(200,168,75,0.3);
+    color: #c8a84b;
     font-family: 'DM Mono', monospace;
     font-size: 9px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0 12px;
+    border-radius: 4px;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    white-space: nowrap;
     flex-shrink: 0;
-    transition: all 0.2s;
-    margin-left: 6px;
-    vertical-align: middle;
-  }
-  .info-btn:hover {
-    background: rgba(200,168,75,0.15);
-    border-color: var(--gold);
+    height: 36px;
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
   }
 
   .coach-drawer {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    background: var(--ink2);
-    border-top: 1px solid rgba(200,168,75,0.3);
-    border-radius: 18px 18px 0 0;
+    background: #1c2e22;
+    border-top: 2px solid rgba(200,168,75,0.4);
+    border-radius: 14px 14px 0 0;
     z-index: 300;
     transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-    max-height: 80vh;
-    height: 80vh;
+    transition: transform 0.3s ease;
+    height: 72vh;
     display: flex;
     flex-direction: column;
-    width: 100%;
-    box-sizing: border-box;
     overflow: hidden;
   }
-
-  .coach-drawer.open {
-    transform: translateY(0);
-  }
+  .coach-drawer.open { transform: translateY(0); }
 
   .drawer-handle {
-    width: 36px;
-    height: 4px;
-    background: rgba(255,255,255,0.15);
+    width: 32px; height: 3px;
+    background: rgba(255,255,255,0.18);
     border-radius: 2px;
-    margin: 12px auto 0;
+    margin: 10px auto 0;
     flex-shrink: 0;
   }
 
   .drawer-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    padding: 12px 16px 10px;
+    padding: 10px 14px 8px;
     flex-shrink: 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
   }
 
-  .drawer-topic {
-    flex: 1;
-  }
+  .drawer-topic { flex: 1; min-width: 0; overflow: hidden; }
 
   .drawer-eyebrow {
     font-family: 'DM Mono', monospace;
-    font-size: 8px;
-    letter-spacing: 0.2em;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 3px;
+    font-size: 8px; letter-spacing: 0.15em;
+    color: #c8a84b; text-transform: uppercase;
+    margin-bottom: 2px;
   }
 
   .drawer-title {
     font-family: 'Playfair Display', serif;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--white);
-    line-height: 1.2;
+    font-size: 15px; font-weight: 700;
+    color: #faf6ee; line-height: 1.2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
   .drawer-close {
     background: none;
-    border: 1px solid rgba(255,255,255,0.1);
-    color: var(--muted);
-    font-size: 14px;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-left: 12px;
-    margin-top: 2px;
-    transition: all 0.2s;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #8a9e8e; font-size: 14px;
+    width: 34px; height: 34px;
+    border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-left: 10px;
   }
-  .drawer-close:hover { border-color: rgba(255,255,255,0.3); color: var(--cream); }
 
   .drawer-body {
-    padding: 14px 16px 8px;
-    overflow-y: auto;
-    flex: 1;
+    padding: 14px 14px 6px;
+    overflow-y: auto; flex: 1;
     -webkit-overflow-scrolling: touch;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
   }
 
   .drawer-loading {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--muted);
-    font-style: italic;
-    font-size: 14px;
+    display: flex; align-items: center;
+    gap: 10px; color: #8a9e8e;
+    font-style: italic; font-size: 13px;
   }
 
-  .drawer-dots {
-    display: flex;
-    gap: 4px;
-  }
-
+  .drawer-dots { display: flex; gap: 4px; }
   .drawer-dots span {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--gold);
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #c8a84b;
     animation: dot-pulse 1.2s ease-in-out infinite;
   }
   .drawer-dots span:nth-child(2) { animation-delay: 0.2s; }
   .drawer-dots span:nth-child(3) { animation-delay: 0.4s; }
-
   @keyframes dot-pulse {
     0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
     40% { opacity: 1; transform: scale(1); }
   }
 
   .drawer-content {
-    font-size: 14px;
-    color: var(--cream);
-    line-height: 1.65;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+    font-size: 14px; color: #f2ead8;
+    line-height: 1.65; word-wrap: break-word;
   }
-
   .drawer-content p { margin-bottom: 12px; }
-  .drawer-content p:last-child { margin-bottom: 0; }
-
-  .drawer-content strong {
-    color: var(--white);
-    font-weight: 600;
-  }
-
-  .drawer-content em {
-    color: var(--gold);
-    font-style: italic;
-  }
-
-  .drawer-content .drill-example {
-    background: rgba(255,255,255,0.04);
-    border-left: 2px solid var(--gold);
-    padding: 10px 14px;
-    border-radius: 0 6px 6px 0;
-    margin: 10px 0;
-    font-size: 14px;
-    color: var(--muted);
-  }
+  .drawer-content strong { color: #faf6ee; font-weight: 600; }
+  .drawer-content em { color: #c8a84b; font-style: italic; }
 
   .drawer-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 299;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 299; opacity: 0;
+    pointer-events: none; transition: opacity 0.3s;
   }
-  .drawer-overlay.open {
-    opacity: 1;
-    pointer-events: all;
-  }
+  .drawer-overlay.open { opacity: 1; pointer-events: all; }
 
-  /* Ask anything bar */
   .ask-bar {
-    display: flex;
-    gap: 8px;
-    padding: 10px 16px 16px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    flex-shrink: 0;
-    background: var(--ink2);
+    display: flex; gap: 8px;
+    padding: 8px 14px 16px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0; background: #1c2e22;
   }
 
   .ask-input {
-    flex: 1;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: var(--cream);
+    flex: 1; min-width: 0;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #f2ead8;
     font-family: 'Crimson Pro', serif;
-    font-size: 14px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    outline: none;
-    transition: border-color 0.2s;
+    font-size: 14px; padding: 8px 10px;
+    border-radius: 6px; outline: none;
   }
-  .ask-input:focus { border-color: rgba(200,168,75,0.4); }
-  .ask-input::placeholder { color: rgba(255,255,255,0.2); }
+  .ask-input::placeholder { color: rgba(255,255,255,0.25); }
 
   .ask-send {
-    background: var(--gold);
-    border: none;
-    color: var(--ink);
+    background: #c8a84b; border: none;
+    color: #0f1a14;
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    font-weight: 500;
-    padding: 8px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    letter-spacing: 0.08em;
-    transition: background 0.2s;
-    white-space: nowrap;
+    font-size: 10px; font-weight: 700;
+    padding: 8px 14px; border-radius: 6px;
+    cursor: pointer; white-space: nowrap;
+    min-height: 38px;
   }
-  .ask-send:hover { background: var(--gold-light); }
   .ask-send:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
 
@@ -3031,117 +2954,229 @@ let drawerConversation = [];
 let drawerTopic = '';
 let drawerIsLoading = false;
 
-const COACH_SYSTEM = `You are the number one golf coach in the world. You have coached major champions, world number ones, and tour winners across every major tour. You have spent decades standing on ranges watching the best players alive build and rebuild their swings. You understand biomechanics at the deepest level — ground reaction forces, kinematic sequencing, pressure mapping, 3D motion capture. You understand sports neuroscience — motor learning theory, myelin, the cerebellum, amygdala responses under pressure. You have seen every pattern, every compensation, every mental block a golfer can have. And you know exactly what to say to cut through all of it.
+const STATIC_COACH_CONTENT = {
+  "Slow-Motion Rehearsal": `The reason you practice at 10 percent speed is not to be careful. It is to drop below the threshold at which your old pattern fires automatically. Your cerebellum has that old swing myelinated - it is a fast, efficient highway. At full speed, your motor system defaults to it before your conscious mind can do anything about it. Slow motion puts you below that threshold and forces the motor system to recruit different pathways.
 
-Your voice is authoritative but never arrogant. Precise but never cold. You speak the way the greatest coaches speak — with earned confidence, rare analogies, and the ability to make complex biomechanics feel like common sense. You have a gift for the perfect cue, the one sentence that unlocks something a player has been fighting for months. You do not waste words. When you speak, players listen, because every word has weight behind it.
+Eyes closed matters more than most people realize. When you remove visual feedback, you are forced into proprioceptive mode - you have to feel the position rather than see it. This encodes the movement through a completely different sensory channel, which means you are building the new pattern in two systems simultaneously. That dual encoding is what makes it stick.
 
-The golfer you are coaching right now is athletic and already understands the golf swing at a serious level. Do not explain basics. Do not patronize. Speak to them as a peer who happens to know more — a trusted expert they have earned access to. When something matters, say it plainly and with conviction. When something is subtle, honor the subtlety. You are not managing their feelings — you are building their game.
+Do 20 reps. Treat each one as deliberate. If you feel the old pattern creeping in, slow down further. The goal is not to complete the drill - it is to complete it in the new pattern only.`,
+  "Mirror Work": `The mirror is not vanity. It is a second encoding channel. When you see the correct position while feeling it, you activate both the visual cortex and the motor cortex simultaneously. Research on dual encoding shows this accelerates pathway formation significantly compared to either channel alone.
 
-When explaining drills or concepts: give the real reason it works, not the surface-level version. Connect the physical sensation to the neurological reality. Tell them what it feels like when it is right, what it feels like when it is wrong, and why that distinction matters. Speak in prose — flowing, confident, occasionally poetic when the moment calls for it. Never use bullet lists. 3 to 6 paragraphs. Leave them feeling sharper, more confident, and clearer than before they asked.`;
+Stand close enough to see detail. What you are looking for is not perfection - it is the key position you are trying to change. Freeze there. Look at it. Hold it for three seconds while registering the feeling. Then do it again. 10 reps. The visual confirmation followed by the felt sensation is the sequence that wires them together.
 
-async function openCoach(topic, context) {
+The common mistake is using the mirror to check and correct constantly. That turns it into a feedback loop that trains visual dependency. Use it to confirm, then close your eyes and feel the same thing without it. That transfer - seeing it, then feeling it without seeing - is where the encoding happens.`,
+  "Constraint Drill": `A constraint drill makes your old pattern physically impossible. Not harder - impossible. That is the crucial distinction. When you have to think your way to a new position, the cerebellum eventually overrides your intentions and fires the old pattern. When a physical constraint blocks the old movement, the motor system has no choice but to find a new path.
+
+The headcover under the trail arm for shallowing. The alignment stick outside the ball for over-the-top. The chair behind your hips for early extension. The impact bag for flip. Each one blocks the compensation so completely that the nervous system stops trying to make it work and starts recruiting the pattern that actually can.
+
+Set it up so the constraint gives you immediate feedback when you violate it - the headcover drops, the stick gets hit, the bag stops the flip. Do 20 reps with the constraint, then 5 without it while trying to feel the same thing. That last 5 is where the transfer happens. The constraint builds the highway - the unconstrained reps are when you start driving on it.`,
+  "Pause and Check": `Stopping at a position and holding it for three seconds does something specific neurologically. It converts a moving target into a fixed one long enough for your conscious mind to register exactly where you are and what it feels like. At normal speed, the position is gone before your brain can evaluate it. At a pause, you can actually feel it.
+
+The three seconds matters. One second is not enough for the sensory registration to complete. Three seconds gives the proprioceptive system time to map the joint angles, the weight distribution, the muscle tension. It turns a flash into a photograph.
+
+Do 15 reps. Pause at the exact position you are trying to change - top of backswing, shaft position at P3, impact. Hold it. Ask yourself what it feels like. Then do it again. Over time you are building a sensory library for the new position so the brain can recognize when it arrives there at full speed.`,
+  "Blocked Practice": `Blocked practice - the same drill over and over - is how you first encode a pattern. It feels productive because you get better at it quickly. That rapid improvement is real but shallow. You are loading the working memory, not myelinating a pathway. The moment you change context - different club, different target, different situation - the improvement disappears.
+
+Use blocked practice at the beginning of Phase 2 when the pattern is new and fragile. Short irons, half speed, close target. You are not trying to perform - you are trying to find the pattern and repeat it enough times that the motor system starts to recognize it. Think of it as tracing the route before you memorize it.
+
+The mistake is staying in blocked practice too long because it feels good. It is comfortable because you are getting it right. But comfort in practice is not the same as durability under pressure. After the pattern is recognizable, move to random practice even though it will feel worse.`,
+  "Random Practice": `Random practice feels like it is not working. You change clubs every shot, vary targets, vary trajectories. You cannot find the pattern. Your scores during the session are worse than during blocked practice. This frustration is the learning. This is the contextual interference effect - Schmidt and Bjork proved it definitively.
+
+Here is what is happening neurologically. In blocked practice, the motor system uses working memory - it just repeats the last solution. In random practice, it has to reconstruct the pattern from scratch each time. That reconstruction process is what builds durable neural encoding. The brain has to find the new pattern, not just repeat it. Finding it is what builds the pathway.
+
+Do this in week 3 and beyond. Alternate clubs every shot. Change targets. Hit different trajectories. Score will suffer temporarily. That suffering is the signal that real encoding is happening. When the pattern starts showing up in random practice, it owns it.`,
+  "Confidence Interleaving": `Self-efficacy state matters for motor encoding. When you are in a low-confidence state - frustrated, tense, feeling like the pattern is gone - your nervous system is flooded with cortisol. Cortisol impairs motor learning directly. The amygdala is activated and the motor cortex is suppressed. You are literally less able to encode in that state.
+
+Interleaving confident shots breaks the cortisol cycle. Hit your wedge - something you own. Feel competent. Let the nervous system settle. Then go back to the new pattern. The alternation keeps you in a state where encoding is possible.
+
+This is not about avoiding difficulty. It is about managing the neurochemical environment. You cannot learn well when you are anxious. Mixing shots you own with the new pattern keeps the system receptive.`,
+  "Game-Like Practice": `The range is a simulation. The course is the real thing. Motor patterns that are built exclusively on the range often fail to transfer because the brain stores them with all the range context attached - same spot, same routine, same low stakes. When the context changes on the course, the recall cues are different and the pattern does not fire.
+
+Game-like practice closes that gap. On the course or sim, every shot is different. The lie changes. The target changes. There is consequence. The nervous system has to retrieve the pattern without the range scaffolding. Each successful retrieval in a new context strengthens the pathway across multiple contexts rather than just one.
+
+In Phase 3, 70 percent of your practice should be here. Not because the range is bad but because transfer does not happen automatically. You have to practice in the environment where you want the pattern to perform.`,
+  "Change Clubs Every Shot": `Changing clubs every shot is the strongest form of contextual interference available on the range. Each club has different length, weight, and lie angle. The motor system has to recalibrate the pattern for each one. That recalibration is exactly the kind of problem-solving that drives deep encoding.
+
+The key is committing to the new pattern on every shot regardless of club. You are not practicing the 7-iron. You are practicing the pattern with the 7-iron, then the driver, then the 9-iron. The club is the variable. The pattern is the constant you are trying to make automatic across all variables.
+
+Do this from week 6 forward. It will feel messy. The messiness is the signal. When the pattern starts showing up consistently across clubs, it has reached the level of robustness you need for it to hold on the course.`,
+  "Speed Training": `Overspeed training - SuperSpeed protocol - belongs in Phase 3, not before. Here is why. Speed training seals whatever kinematic sequence is dominant at the time. If you do it while the old pattern is still dominant, you accelerate and entrench the old pattern. If you do it after the new pattern is established, you accelerate and entrench the new one.
+
+The protocol works by training above your normal speed with lighter implements. The nervous system adapts to the higher speed demand by recruiting motor units more efficiently. When you return to normal weight, the pattern fires faster and with more force. That is the speed gain.
+
+For swing change purposes, the deeper benefit is that fast reps under load test the pattern in a way slow reps cannot. The kinematic sequence has to be correct or the club will not work at high speed. Bad sequences fall apart under speed. Good ones hold. Use speed training as a test as much as a training tool.`,
+  "Course Play": `The course is where patterns are owned, not just learned. There is a critical difference between being able to do something on the range and being able to do it under pressure with consequence. Range work builds the pathway. Course work tests whether the pathway is durable.
+
+In Phase 3, play with process focus only. Score is not the metric yet. Your metric is whether the new pattern shows up - not every time, but consistently. If it shows up 6 out of 10 shots under real conditions, that is significant progress. If it only shows up on the range, you have more transfer work to do.
+
+The two-ball drill on the course is valuable here. First ball with no thought - pure play mode. Second ball with your one cue. Compare. Over time the cueless ball will start matching the cued one. When that happens, the pattern is close to owned.`,
+  "Full Pre-Shot Routine": `Your pre-shot routine is a neural trigger. It tells the brain: stop analyzing, start executing. The handoff from the analytical pre-motor cortex to the automatic cerebellum only happens reliably when there is a consistent signal that triggers it. Your routine is that signal.
+
+The routine has to be identical in practice and play. Not similar - identical. Same number of looks. Same practice swing. Same breath. Same trigger. The consistency is what builds the association between the routine and the automatic execution mode. Vary the routine and you break the trigger.
+
+Process during the round: decision behind the ball, one feel rehearsal in the practice swing, one external cue as you step in, eyes to target, execute. Nothing during the swing. If a thought comes, let it pass. The routine already did its job. Your only job now is to trust it.`,
+  "Two-Ball Drill": `The two-ball drill builds trust by giving you evidence. Hit the first ball with zero swing thought - pure play mode, no cue, just target. Hit the second with your one cue. Compare them. Over weeks, you will start to see that the cueless ball is often just as good as the cued one. Sometimes better.
+
+That observation is the foundation of trust. You are not deciding to trust your swing. You are observing that it works without conscious intervention. Observed evidence is more persuasive to the nervous system than a decision. The brain updates based on what it sees, not what you tell it.
+
+Do this in practice rounds. Do it on the range. The goal is to accumulate enough evidence that on the course, when the pressure is real, the decision to let go is backed by a record of it working.`,
+  "Competition Rounds": `When you play competitively during a swing change, score is not the metric. Process is. The three questions after every round: did I commit to the cue and let go? Did I stay neutral after bad shots? Did I feel the new pattern even on mishits? If you can answer yes to all three, the round was a success regardless of the number on the card.
+
+The reason score is not the metric is that you are asking your pattern to perform in its most vulnerable phase - established enough to use but not yet automatic enough to be reliable under pressure. Some regression is normal. The regression does not mean the change is failing. It means the change is in progress.
+
+Keep playing. The only way to own a pattern under pressure is to experience it under pressure repeatedly. Each round is a rep. Each rep builds the resilience of the pathway.`,
+  "Mental Rehearsal": `Five minutes of vivid visualization activates the same neural circuits as physical practice. This is not motivational talk - it is confirmed neuroscience. The motor cortex fires during mental rehearsal of movement. The pattern is being encoded even though the club never left the ground.
+
+The quality of the visualization matters more than the quantity. You want to feel the swing, not watch it. First-person perspective, full sensory detail - the weight of the club, the feel of the grip, the sound of impact, the flight of the ball. The more vivid and felt, the more the motor cortex engages.
+
+Do this before sleep when possible. Motor memory consolidates during deep sleep. Visualizing the new pattern immediately before sleep means the brain processes that specific pathway during consolidation. It is the most efficient practice time you have.`,
+  "Phase 1: Deconstruction": `The entire purpose of Phase 1 is to interrupt the old pattern without replacing it with something fragile. You are not trying to swing the new way at full speed yet. You are trying to build the raw motor primitives - the individual position feels and movement sensations - that the new pattern will be assembled from.
+
+The reason you must go slow is that your cerebellum has the old pattern myelinated. Myelin is the insulating sheath around neural fibers that makes them fire fast and efficiently. At full speed, the old pattern fires before your conscious intention can override it. Below a certain speed threshold, the automation does not engage. That is the window where new patterns can be built.
+
+Expect nothing from the ball in Phase 1. Ball flight is irrelevant. Contact quality is irrelevant. The only thing that matters is whether you completed the drill correctly and whether you felt the new position. 70 percent of your practice should have no ball at all.`,
+  "Phase 2: Encoding": `Phase 2 is where the pattern meets the ball for real. The sequence of sessions matters. Start each week with blocked practice - same drill, short irons, half speed, close target. Get the pattern accessible. Then move to random practice - different clubs, different targets, no repeating the same shot twice. The week should end with a game-like session on the course or sim.
+
+The contextual interference effect means the random session will feel worse than the blocked session. Your scores will be higher, your contact less consistent. This is not regression - it is the deepest kind of practice. The motor system is building a more robust pathway precisely because it has to find the pattern from scratch each time rather than just repeating it.
+
+Weeks 3 and 4 are the plateau. You will feel like the change is not working. The old pattern will assert itself especially under any kind of pressure. This is the most neurologically critical phase of the change. Do not retreat to the old pattern. Stay in the protocol. The pattern is building even when it does not feel like it.`,
+  "Phase 3: Consolidation": `Phase 3 is where the pattern either takes root or dies. The deciding factor is whether you take it to the course. Range-only practice in this phase will produce a pattern that performs on the range and disappears on the course. The transfer work is not optional.
+
+70 percent course or simulator, 30 percent range. On the course, play with process focus. The two questions after every round: did the new pattern show up under pressure, and did I stay committed to it when it did not? Score is starting to matter more but it is still not the primary metric.
+
+Speed training belongs here. Add SuperSpeed protocol or equivalent now that the new pattern is the dominant one. Overspeed work seals the kinematic sequence by forcing it to function at velocities higher than your normal swing. When you return to normal speed, the sequence is stronger and faster. It is the final encoding step before competition.`,
+  "Phase 4: Competition": `You are not going to feel fully confident in the new pattern under pressure in Phase 4. That feeling of uncertainty is normal and it does not mean the pattern is not ready. Patterns feel uncertain before they are owned because the brain has not yet accumulated enough evidence of them working under pressure to generate automatic confidence.
+
+The approach in competition is simple: trust the routine, trust the preparation, execute the process. One cue as you step in. Eyes to the target. Let it go. The analytical mind's job ended during the decision phase. From the moment you start your swing, you are not a thinker. You are an athlete executing a pattern that has been built through months of deliberate work.
+
+Neutral affect after every shot. Good shot, bad shot - same reaction. Walk to the next one. The amygdala encodes based on emotional salience. A bad shot met with frustration gets encoded deeply. A bad shot met with neutrality gets filed and forgotten. You are managing your memory as much as your swing.`,
+  "The Plateau Zone": `What is happening right now is neurologically predictable. The old pattern has been partially disrupted - it is no longer firing as automatically as it was. But the new pattern is not yet myelinated enough to be reliable. You are in the gap between the two.
+
+This feels like regression. It is not. The old pattern is losing dominance. The new one is being built. The frustration you feel is evidence that something real is changing. Golfers who do not understand this quit here and conclude the change did not work. They go back to the old pattern and never know how close they were.
+
+Stay in Phase 2 protocol exactly. Do not add anything new. Do not retreat to the old pattern even for one session. The bridge across the plateau is repetition of the correct pattern even when it feels wrong. In most cases the crossing takes 7 to 10 days. On the other side of it, the new pattern will start to feel accessible in a way it never did before.`,
+  "The Trigger Cue": `A good trigger cue does one thing: it gives the cerebellum a signal to take over from the analytical mind. It is the last conscious input before execution begins. For that reason it must be simple enough to land in under a second, and it must point toward the target or toward a feeling rather than toward a body part.
+
+External cues outperform internal ones for skilled performers. This is Wulf's OPTIMAL theory and it is consistently supported. Swing to the target, chase the flag, hit through the post - these produce better motor output than keep the elbow in or turn the hips. The external focus frees the motor system to self-organize rather than trying to consciously control individual segments.
+
+One cue only. The moment you have two cues you have two analytical instructions competing and neither one triggers the automatic system. Pick the one that most directly captures the feeling of the new pattern and use it every shot in practice until it becomes the trigger. Then use it on the course.`,
+  "Box Breathing Reset": `After a bad shot your cortisol is elevated, your amygdala is activated, and your motor cortex is suppressed. This is not a mental weakness - it is a physiological state. In that state you are less capable of executing a skilled movement than you were before the bad shot. The next shot suffers not because of the bad shot itself but because of your body's stress response to it.
+
+Box breathing interrupts the cortisol cascade directly. Four seconds in activates the parasympathetic nervous system. Four second hold maintains it. Four seconds out completes the downregulation. Four cycles brings your heart rate variability back toward baseline and reopens the motor cortex to full function.
+
+Do not skip this after bad shots. It is not a coping mechanism - it is a physiological reset that makes the next shot neurologically possible. The 60 seconds it takes is the best investment you can make before stepping onto the next shot.`,
+  "Process Score": `Score is not the metric during a swing change. Process is. The reason is that score reflects too many variables - course difficulty, putting, luck - to be a reliable signal of whether your swing change is progressing. A 78 on a hard day with the new pattern showing up consistently is better progress than a 72 on an easy day reverting to the old one.
+
+The three questions after each round measure the only things that are actually under your control: did you commit and let go, did you stay neutral after bad shots, did you feel the pattern even when it did not produce good results. These are the behaviors that build the pattern. The score is the outcome. You control the behaviors, not the outcome.
+
+When all three answers are consistently yes over several rounds, the score will start to reflect it. The lag between process improvement and score improvement is usually two to four weeks. Trust the process data. The score data is coming.`,
+  "Hebb's Law": `Every time a neural circuit fires correctly, the connection between those neurons gets stronger. This is the mechanism behind skill learning. It is not metaphorical - it is the physical deposition of myelin around the axons involved in the movement. Myelin is the white matter that insulates nerve fibers and dramatically increases their transmission speed.
+
+The implication for your practice is that every correct rep matters and every incorrect rep at full speed potentially reinforces the wrong thing. This is why constraint drills and slow motion matter in Phase 1. You are trying to fire the new circuit, not the old one. The old circuit already has a head start in terms of myelination. You are building a competing highway.
+
+Patience is not a soft virtue in this context. It is a hard biological requirement. Myelin deposition takes weeks of consistent correct repetition. There is no shortcut. The pattern will feel slow to develop because it is slow to develop at the cellular level. It is building even when you cannot feel it.`,
+  "Contextual Interference Effect": `Robert Bjork and Richard Schmidt proved this in the 1970s and it has been replicated consistently since. Blocked practice - the same drill repeated - produces faster initial learning but poorer retention. Random practice - varying the task constantly - produces slower initial learning but dramatically better retention and transfer.
+
+The mechanism is this. In blocked practice, the motor system keeps the last solution in working memory and repeats it. No real reconstruction is required. In random practice, the previous solution has been displaced by other tasks and the system has to regenerate it from scratch. That regeneration process is what builds the durable pathway.
+
+This is why your random practice sessions feel worse than your blocked ones. The worse feeling is the signal that real learning is happening. If random practice felt as smooth as blocked practice, it would mean the same shallow encoding was occurring. The difficulty is the mechanism. Do not try to make it easier.`,
+  "OPTIMAL Theory": `Gabriele Wulf's OPTIMAL theory - Optimizing Performance Through Intrinsic Motivation and Attentional Focus - establishes two things clearly. First, external focus of attention produces better motor output than internal focus. Second, enhanced expectancy of success improves learning.
+
+For your swing change, this means your cue should point outward - at the target, at the ball flight, at a spot in the distance - rather than inward at body parts. When you focus on where the ball goes, the motor system self-organizes the movement. When you focus on your elbow or your hips, you fragment the movement into consciously controlled segments and lose the coordination that makes skilled motion work.
+
+This is counterintuitive because it feels like you should be thinking about what your body is doing. That feeling is wrong. The body knows how to swing. Your job is to point it at a target and get out of the way.`,
+  "Movement Variability": `Nikolai Bernstein established that skilled movement is never exactly the same twice. The brain does not store a single motor program and replay it. It stores a movement category - a family of solutions - and generates a specific solution for each situation based on current conditions.
+
+This has profound implications for how you practice. If you practice in one context only - same range mat, same ball position, same target, same conditions - you are building a pattern with a very narrow category. It performs in that one context and transfers poorly.
+
+Variability in practice - different lies, different ball positions, different targets, different clubs, different conditions - builds a wider category. The pattern becomes more robust because it has been encoded across more variations. This is why course play is essential and why contextual interference works. Variability is not noise in the learning process. It is the mechanism.`,
+  "Sleep Consolidation": `Motor learning consolidates during deep sleep. This is not a theory - it is observed at the cellular level. The hippocampus replays the day's motor sequences during slow-wave sleep and transfers them to long-term motor memory. Myelin continues to be deposited during this consolidation phase.
+
+The practical implications are direct. Practice before sleep is more effective than practice first thing in the morning for new pattern acquisition. The new pattern gets a full night of consolidation immediately rather than waiting until evening. If you can practice in the evening, even 20 minutes of correct reps before sleep is worth more than an hour in the morning for building a new pathway.
+
+Sleep debt impairs motor learning directly. Less than 7 hours reduces the consolidation phase. If you are working on a serious swing change, sleep quality is training. Treat it that way.`,
+  "Amygdala Hijack": `Under pressure, the amygdala activates. Cortisol and adrenaline flood the system. The prefrontal cortex - responsible for analysis and decision-making - is partially suppressed. The motor cortex reverts to its most established patterns. This is why your swing under pressure defaults to the old one even when you have been practicing the new one for weeks.
+
+The solution is not willpower. You cannot consciously override an amygdala activation that is happening at 200 milliseconds. The solution is architecture - building systems that reduce the amygdala's influence before the swing begins.
+
+The pre-shot routine is the architecture. A consistent routine that has been repeated thousands of times triggers a conditioned state - the automatic execution mode - before the amygdala has time to shift into threat response. Breathing is the reset tool when the amygdala has already fired. Neutral affect after bad shots is how you prevent the amygdala from compounding across shots.`,
+  "Distributed Practice": `The nervous system does not learn efficiently in long massed sessions. It learns efficiently in distributed sessions with recovery time between them. This is because consolidation - the process of transferring new motor patterns into long-term memory - happens between practice sessions, not during them.
+
+Thirty minutes every day produces dramatically better retention than three and a half hours once a week, even though the total time is identical. The daily sessions give the consolidation process a chance to run each night. The weekly session front-loads all the input with nowhere near enough consolidation time between reps.
+
+For your practice schedule, this means frequency beats duration. Six 30-minute sessions a week is better than two 90-minute sessions. If you can only practice twice a week, the change will take longer. Not because you are working less hard but because the biology of consolidation requires time between inputs.`
+};
+
+function openCoach(topic, contextKey) {
   drawerTopic = topic;
-  drawerConversation = [];
 
   document.getElementById('drawer-eyebrow').textContent = 'World No. 1 Coach';
   document.getElementById('drawer-title').textContent = topic;
-  document.getElementById('drawer-loading').style.display = 'flex';
-  document.getElementById('drawer-content').style.display = 'none';
-  document.getElementById('drawer-content').innerHTML = '';
+  document.getElementById('drawer-loading').style.display = 'none';
   document.getElementById('ask-input').value = '';
+
+  const content = document.getElementById('drawer-content');
+  content.style.display = 'block';
+  content.innerHTML = '';
+
+  // Find content by topic key or title
+  let text = STATIC_COACH_CONTENT[topic] || STATIC_COACH_CONTENT[contextKey] || null;
+
+  // Try partial match
+  if (!text) {
+    const topicLower = topic.toLowerCase();
+    for (const [k, v] of Object.entries(STATIC_COACH_CONTENT)) {
+      if (k.toLowerCase().includes(topicLower) || topicLower.includes(k.toLowerCase())) {
+        text = v;
+        break;
+      }
+    }
+  }
+
+  if (text) {
+    text.split('\n\n').filter(Boolean).forEach(para => {
+      const p = document.createElement('p');
+      p.textContent = para;
+      content.appendChild(p);
+    });
+  } else {
+    const p = document.createElement('p');
+    p.style.color = '#8a9e8e';
+    p.style.fontStyle = 'italic';
+    p.textContent = 'Tap a specific drill, phase, or science principle to get the coach explanation for it.';
+    content.appendChild(p);
+  }
 
   document.getElementById('drawer-overlay').classList.add('open');
   document.getElementById('coach-drawer').classList.add('open');
-
-  const prompt = context || `Explain "${topic}" in the context of my swing change program. What is it, why does it work neurologically, and how do I do it correctly?`;
-
-  await askCoach(prompt);
-}
-
-async function askCoach(prompt) {
-  if (drawerIsLoading) return;
-  drawerIsLoading = true;
-
-  document.getElementById('drawer-loading').style.display = 'flex';
-  document.getElementById('ask-send').disabled = true;
-
-  drawerConversation.push({ role: 'user', content: prompt });
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: COACH_SYSTEM,
-        messages: drawerConversation,
-      })
-    });
-
-    const data = await response.json();
-    const text = data.content?.[0]?.text || 'Sorry, I could not load an explanation right now.';
-
-    drawerConversation.push({ role: 'assistant', content: text });
-
-    document.getElementById('drawer-loading').style.display = 'none';
-    const content = document.getElementById('drawer-content');
-    content.style.display = 'block';
-
-    // Render — append new response with a subtle separator if follow-up
-    if (drawerConversation.length > 2) {
-      const sep = document.createElement('div');
-      sep.style.cssText = 'height:1px;background:rgba(255,255,255,0.07);margin:14px 0;';
-      content.appendChild(sep);
-      const qDiv = document.createElement('div');
-      qDiv.style.cssText = 'font-family:"DM Mono",monospace;font-size:9px;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;';
-      qDiv.textContent = '>> ' + drawerConversation[drawerConversation.length-2].content;
-      content.appendChild(qDiv);
-    }
-
-    const p = document.createElement('div');
-    p.className = 'drawer-content';
-    p.style.display = 'block';
-    // Format paragraphs
-    text.split('\n\n').filter(Boolean).forEach(para => {
-      const el = document.createElement('p');
-      el.innerHTML = para
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>');
-      p.appendChild(el);
-    });
-    content.appendChild(p);
-
-    // Scroll to bottom
-    const body = document.getElementById('drawer-body');
-    body.scrollTop = body.scrollHeight;
-
-  } catch(err) {
-    document.getElementById('drawer-loading').style.display = 'none';
-    const content = document.getElementById('drawer-content');
-    content.style.display = 'block';
-    content.innerHTML = '<p style="color:var(--muted);font-style:italic;">Could not reach the coach right now. Check your connection and try again.</p>';
-  }
-
-  drawerIsLoading = false;
-  document.getElementById('ask-send').disabled = false;
 }
 
 function askFollowUp() {
+  // Static version - no API
   const input = document.getElementById('ask-input');
   const q = input.value.trim();
-  if (!q || drawerIsLoading) return;
+  if (!q) return;
   input.value = '';
-  askCoach(q);
+  const content = document.getElementById('drawer-content');
+  const sep = document.createElement('div');
+  sep.style.cssText = 'height:1px;background:rgba(255,255,255,0.07);margin:14px 0;';
+  content.appendChild(sep);
+  const qEl = document.createElement('div');
+  qEl.style.cssText = 'font-size:11px;color:#c8a84b;font-style:italic;margin-bottom:8px;font-family:"DM Mono",monospace;';
+  qEl.textContent = q;
+  content.appendChild(qEl);
+  const p = document.createElement('p');
+  p.style.color = '#8a9e8e';
+  p.style.fontStyle = 'italic';
+  p.textContent = 'For live coaching conversations, use the app while connected to Claude.ai.';
+  content.appendChild(p);
 }
 
 function closeDrawer() {
   document.getElementById('drawer-overlay').classList.remove('open');
   document.getElementById('coach-drawer').classList.remove('open');
 }
+
 
 // ── DRILL INFO BUTTONS ────────────────────────────────────────────────────
 const DRILL_CONTEXTS = {
