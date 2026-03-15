@@ -3490,6 +3490,10 @@ function resetAnalysis() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  renderDashboard();
+  setReadMode('cold');
+});
 </script>
 </body>
 </html>
