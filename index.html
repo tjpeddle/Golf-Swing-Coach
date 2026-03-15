@@ -1,0 +1,3495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swing Change Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f1a14;
+    --ink2: #1c2e22;
+    --fairway: #1e3a28;
+    --green: #2d5a3d;
+    --light-green: #4a8c62;
+    --gold: #c8a84b;
+    --gold-light: #e0c06a;
+    --cream: #f2ead8;
+    --parchment: #e8dfc8;
+    --sand: #d4c9a8;
+    --white: #faf6ee;
+    --muted: #8a9e8e;
+    --red: #8b2e2e;
+    --amber: #b87333;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'Crimson Pro', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.6;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: rgba(15, 26, 20, 0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(200, 168, 75, 0.2);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 56px;
+  }
+
+  .nav-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 2px;
+  }
+
+  .nav-tab {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.2s;
+  }
+
+  .nav-tab:hover { color: var(--cream); }
+  .nav-tab.active {
+    background: rgba(200, 168, 75, 0.12);
+    color: var(--gold);
+  }
+
+  .nav-phase {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .nav-phase span {
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  /* ── MAIN ── */
+  main {
+    padding-top: 56px;
+    min-height: 100vh;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── HERO / DASHBOARD ── */
+  .hero {
+    padding: 48px 24px 32px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .hero-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--white);
+  }
+
+  .hero-title em {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .hero-subtitle {
+    margin-top: 10px;
+    font-size: 17px;
+    color: var(--muted);
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  .week-badge {
+    background: var(--fairway);
+    border: 1px solid rgba(200,168,75,0.3);
+    border-radius: 8px;
+    padding: 16px 20px;
+    text-align: center;
+    min-width: 120px;
+  }
+
+  .week-badge .num {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .week-badge .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* Phase Progress Bar */
+  .phase-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    margin-bottom: 36px;
+  }
+
+  .phase-seg {
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .phase-seg-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 2px;
+    transition: width 0.6s ease;
+  }
+
+  .phase-labels {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    margin-top: 6px;
+    margin-bottom: 28px;
+  }
+
+  .phase-lbl {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 4px 0;
+    transition: color 0.2s;
+  }
+
+  .phase-lbl:hover, .phase-lbl.active { color: var(--gold); }
+
+  /* Dashboard cards */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    background: var(--fairway);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+
+  .card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .card-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  .card-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* Today's Protocol */
+  .protocol-card {
+    background: var(--fairway);
+    border: 1px solid rgba(200,168,75,0.2);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .protocol-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .protocol-title::before {
+    content: '';
+    width: 3px;
+    height: 20px;
+    background: var(--gold);
+    display: block;
+    border-radius: 2px;
+  }
+
+  .drill-list { list-style: none; }
+
+  .drill-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 4px;
+    padding: 10px 8px;
+  }
+
+  .drill-item:hover { background: rgba(255,255,255,0.03); }
+
+  .drill-check {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid rgba(200,168,75,0.4);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .drill-item.done .drill-check {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+
+  .drill-item.done .drill-check::after {
+    content: '✓';
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .drill-item.done .drill-name { text-decoration: line-through; color: var(--muted); }
+
+  .drill-name {
+    font-size: 15px;
+    color: var(--cream);
+    font-weight: 600;
+  }
+
+  .drill-desc {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  .drill-reps {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    flex-shrink: 0;
+    padding-left: 8px;
+  }
+
+  /* ── SESSION LOG ── */
+  .log-session-btn {
+    width: 100%;
+    background: var(--green);
+    border: 1px solid rgba(200,168,75,0.3);
+    color: var(--gold);
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    margin-bottom: 16px;
+  }
+
+  .log-session-btn:hover {
+    background: var(--light-green);
+    color: var(--white);
+  }
+
+  /* ── ON COURSE PAGE ── */
+  .course-page {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 36px 24px;
+  }
+
+  .shot-protocol {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: 32px;
+  }
+
+  .shot-step {
+    background: var(--fairway);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .shot-step.active-step {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(200,168,75,0.1);
+  }
+
+  .shot-step-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    cursor: pointer;
+  }
+
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    background: rgba(200,168,75,0.1);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+
+  .active-step .step-num {
+    background: var(--gold);
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .step-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+    flex: 1;
+  }
+
+  .step-keyword {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 3px 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 3px;
+  }
+
+  .active-step .step-keyword {
+    color: var(--gold);
+    border-color: rgba(200,168,75,0.3);
+  }
+
+  .step-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.35s;
+    padding: 0 18px;
+  }
+
+  .step-body.open {
+    max-height: 200px;
+    padding: 0 18px 16px;
+  }
+
+  .step-body p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-style: italic;
+    border-left: 2px solid rgba(200,168,75,0.25);
+    padding-left: 12px;
+  }
+
+  /* Cue editor */
+  .cue-box {
+    background: var(--ink2);
+    border: 1px solid rgba(200,168,75,0.25);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .cue-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .cue-input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--white);
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+    font-style: italic;
+    padding: 12px 14px;
+    border-radius: 6px;
+    text-align: center;
+    letter-spacing: 0.03em;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .cue-input:focus { border-color: rgba(200,168,75,0.5); }
+  .cue-input::placeholder { color: rgba(255,255,255,0.15); }
+
+  .cue-hint {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* Breathing tool */
+  .breathe-widget {
+    background: var(--ink2);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .breathe-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .breathe-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid rgba(200,168,75,0.3);
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    transition: transform 0.8s ease, border-color 0.8s ease;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .breathe-circle.expanding {
+    transform: scale(1.35);
+    border-color: var(--gold);
+  }
+
+  .breathe-circle.holding {
+    transform: scale(1.35);
+    border-color: var(--gold-light);
+  }
+
+  .breathe-circle.contracting {
+    transform: scale(1);
+    border-color: rgba(200,168,75,0.3);
+  }
+
+  .breathe-instruction {
+    font-size: 14px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ── PROGRESS PAGE ── */
+  .progress-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 36px 24px;
+  }
+
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 3px;
+    margin-bottom: 24px;
+  }
+
+  .week-dot {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.06);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .week-dot:hover { background: rgba(200,168,75,0.2); }
+  .week-dot.completed { background: var(--green); }
+  .week-dot.current { background: var(--gold); }
+  .week-dot.future { background: rgba(255,255,255,0.04); }
+
+  .week-dot-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'DM Mono', monospace;
+    font-size: 7px;
+    color: rgba(255,255,255,0.3);
+    pointer-events: none;
+  }
+
+  .week-dot.completed .week-dot-label { color: rgba(255,255,255,0.6); }
+  .week-dot.current .week-dot-label { color: var(--ink); font-weight: 700; }
+
+  .session-log {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .session-entry {
+    background: var(--fairway);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 16px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .session-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .session-note {
+    font-size: 14px;
+    color: var(--cream);
+    font-style: italic;
+  }
+
+  .session-tags {
+    display: flex;
+    gap: 4px;
+  }
+
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .tag-range { background: rgba(74,140,98,0.2); color: var(--light-green); }
+  .tag-course { background: rgba(200,168,75,0.15); color: var(--gold); }
+  .tag-mirror { background: rgba(139,46,46,0.2); color: #d4756a; }
+
+  /* ── SCIENCE PAGE ── */
+  .science-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 36px 24px;
+  }
+
+  .principle-card {
+    background: var(--fairway);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-bottom: 10px;
+    border-left: 3px solid var(--gold);
+  }
+
+  .principle-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+
+  .principle-text {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  .principle-text strong { color: var(--cream); }
+
+  /* ── LOG MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,18,13,0.85);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: var(--ink2);
+    border: 1px solid rgba(200,168,75,0.25);
+    border-radius: 14px;
+    padding: 28px;
+    width: 100%;
+    max-width: 480px;
+    transform: translateY(12px);
+    transition: transform 0.25s;
+  }
+
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 20px;
+  }
+
+  .modal-field {
+    margin-bottom: 16px;
+  }
+
+  .modal-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .modal-select, .modal-textarea, .modal-input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--cream);
+    font-family: 'Crimson Pro', serif;
+    font-size: 15px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .modal-select:focus, .modal-textarea:focus, .modal-input:focus {
+    border-color: rgba(200,168,75,0.4);
+  }
+
+  .modal-textarea { resize: vertical; min-height: 80px; }
+
+  .modal-select option { background: var(--ink2); }
+
+  .check-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .check-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  .check-row input[type=checkbox] { accent-color: var(--gold); width: 14px; height: 14px; }
+
+  .check-row span {
+    font-size: 14px;
+    color: var(--cream);
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .btn-primary {
+    flex: 1;
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.2s;
+  }
+
+  .btn-primary:hover { background: var(--gold-light); }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 12px 16px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.25); color: var(--cream); }
+
+  /* ── MOTIVATION BANNER ── */
+  .motivation {
+    background: linear-gradient(135deg, var(--fairway), var(--ink2));
+    border: 1px solid rgba(200,168,75,0.2);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .motivation::before {
+    content: '"';
+    position: absolute;
+    top: -10px; left: 12px;
+    font-family: 'Playfair Display', serif;
+    font-size: 80px;
+    color: rgba(200,168,75,0.1);
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .motivation-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-style: italic;
+    color: var(--cream);
+    line-height: 1.5;
+    position: relative;
+  }
+
+  .motivation-source {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+
+  /* ── POST ROUND CHECKLIST ── */
+  .round-check {
+    background: var(--fairway);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .round-check-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 14px;
+  }
+
+  .yes-no-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .yes-no-row:last-child { border-bottom: none; }
+
+  .yn-question {
+    font-size: 14px;
+    color: var(--cream);
+    flex: 1;
+    padding-right: 16px;
+    line-height: 1.4;
+  }
+
+  .yn-btns {
+    display: flex;
+    gap: 4px;
+  }
+
+  .yn-btn {
+    width: 36px;
+    height: 26px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .yn-btn.yes.selected { background: rgba(74,140,98,0.3); border-color: var(--light-green); color: var(--light-green); }
+  .yn-btn.no.selected  { background: rgba(139,46,46,0.3); border-color: var(--red); color: #d4756a; }
+  .yn-btn:not(.selected):hover { border-color: rgba(255,255,255,0.25); color: var(--cream); }
+
+  .round-score-display {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(200,168,75,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .round-score-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .round-score-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--gold);
+  }
+
+  /* Plateau warning */
+  .plateau-banner {
+    background: rgba(139,46,46,0.15);
+    border: 1px solid rgba(139,46,46,0.3);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    display: none;
+  }
+
+  .plateau-banner.show { display: block; }
+
+  .plateau-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #d4756a;
+    margin-bottom: 4px;
+  }
+
+  .plateau-text {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  /* Sections */
+  .section-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .section-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--white);
+    margin-bottom: 20px;
+  }
+
+  .divider {
+    height: 1px;
+    background: rgba(255,255,255,0.07);
+    margin: 24px 0;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--ink); }
+  ::-webkit-scrollbar-thumb { background: var(--green); border-radius: 3px; }
+
+  .analysis-mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .analysis-mode-card {
+    background: var(--fairway);
+    border: 1.5px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .analysis-mode-card:hover {
+    border-color: rgba(200,168,75,0.35);
+  }
+
+  .analysis-mode-card.active {
+    border-color: var(--gold);
+    background: rgba(200,168,75,0.07);
+  }
+
+  .amode-icon { font-size: 22px; margin-bottom: 7px; }
+
+  .amode-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 5px;
+  }
+
+  .analysis-mode-card.active .amode-title { color: var(--gold); }
+
+  .amode-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  .cold-note-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    line-height: 1.6;
+    border-left: 2px solid rgba(200,168,75,0.3);
+    padding-left: 10px;
+  }
+
+  /* ── DUAL VIDEO GRID ── */
+  .dual-video-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .video-slot {
+    background: var(--fairway);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .slot-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .slot-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .slot-clear-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 2px 5px;
+    transition: color 0.15s;
+  }
+  .slot-clear-btn:hover { color: #e07070; }
+
+  .slot-drop {
+    padding: 28px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: 2px dashed rgba(200,168,75,0.2);
+    margin: 10px;
+    border-radius: 8px;
+  }
+  .slot-drop:hover, .slot-drop.dragover {
+    background: rgba(200,168,75,0.06);
+    border-color: var(--gold);
+  }
+
+  .slot-drop-icon { font-size: 28px; margin-bottom: 8px; }
+  .slot-drop-title { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+  .slot-drop-sub { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; }
+
+  .slot-player { padding: 10px 12px 14px; }
+  .slot-player video { width: 100%; border-radius: 6px; background: #000; display: block; max-height: 190px; object-fit: contain; }
+  .slot-scrub-row { margin: 8px 0; }
+
+  .slot-pos-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .slot-pos-tags .pos-tag { font-size: 8px; padding: 3px 7px; }
+
+  .slot-thumbs { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; min-height: 10px; }
+
+  .slot-thumb { width: 52px; height: 37px; border-radius: 4px; overflow: hidden; border: 1.5px solid rgba(200,168,75,0.35); position: relative; cursor: pointer; }
+  .slot-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .slot-thumb .thumb-label { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.65); font-family: 'DM Mono', monospace; font-size: 6px; color: var(--gold); text-align: center; padding: 1px; }
+  .slot-thumb .thumb-remove { position: absolute; top: 1px; right: 1px; background: rgba(0,0,0,0.7); color: #fff; font-size: 7px; width: 12px; height: 12px; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s; cursor: pointer; }
+  .slot-thumb:hover .thumb-remove { opacity: 1; }
+
+  .single-video-alt { margin-bottom: 14px; text-align: center; }
+  .single-camera-btn { background: none; border: 1px solid rgba(255,255,255,0.1); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; padding: 8px 18px; border-radius: 6px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+  .single-camera-btn:hover { border-color: rgba(200,168,75,0.3); color: var(--gold); }
+
+  .results-compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .compare-col-label { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 0.12em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }
+  .compare-thumbs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .compare-thumb { width: 60px; height: 42px; border-radius: 4px; overflow: hidden; border: 1px solid rgba(200,168,75,0.25); position: relative; }
+  .compare-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .compare-thumb .ct-label { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); font-family: 'DM Mono', monospace; font-size: 6px; color: var(--gold); text-align: center; padding: 1px; }
+
+  .analyze-page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+  }
+
+  .analyze-intro {
+    font-size: 15px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  .mode-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .mode-btn {
+    background: var(--fairway);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 14px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mode-btn:hover { border-color: rgba(200,168,75,0.3); color: var(--cream); }
+  .mode-btn.active {
+    background: rgba(200,168,75,0.1);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .mode-icon { font-size: 16px; }
+
+  .analyze-panel { margin-bottom: 20px; }
+
+  /* Drop zone */
+  .drop-zone {
+    background: var(--fairway);
+    border: 2px dashed rgba(200,168,75,0.3);
+    border-radius: 12px;
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--gold);
+    background: rgba(200,168,75,0.05);
+  }
+
+  .drop-icon { font-size: 36px; margin-bottom: 12px; }
+
+  .drop-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+
+  .drop-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* Camera */
+  .camera-container {
+    position: relative;
+    background: #000;
+    border-radius: 10px;
+    overflow: hidden;
+    aspect-ratio: 16/9;
+    margin-bottom: 12px;
+  }
+
+  #camera-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .camera-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 12px 16px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  }
+
+  .camera-tip {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+  }
+
+  .camera-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .cam-btn {
+    background: var(--fairway);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .cam-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  .cam-record {
+    background: rgba(139,46,46,0.3);
+    border-color: rgba(139,46,46,0.5);
+    color: #e07070;
+  }
+
+  .cam-record.recording {
+    background: rgba(139,46,46,0.6);
+    border-color: #c0504a;
+    color: #fff;
+    animation: rec-pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes rec-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .cam-stop { border-color: rgba(200,168,75,0.4); color: var(--gold); }
+
+  .camera-status {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    min-height: 18px;
+  }
+
+  /* Preview section */
+  .preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .preview-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .reset-btn {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: var(--red); color: #e07070; }
+
+  .video-preview-wrap {
+    border-radius: 10px;
+    overflow: hidden;
+    background: #000;
+    margin-bottom: 16px;
+    aspect-ratio: 16/9;
+  }
+
+  #video-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* Frame scrubber */
+  .frame-section {
+    background: var(--fairway);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+
+  .frame-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .frame-hint {
+    color: var(--muted);
+    font-size: 8px;
+  }
+
+  .frame-scrubber { margin-bottom: 14px; }
+
+  .scrubber-input {
+    width: 100%;
+    accent-color: var(--gold);
+    cursor: pointer;
+    height: 4px;
+  }
+
+  .frame-captures {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+    min-height: 20px;
+  }
+
+  .captured-frame {
+    position: relative;
+    width: 80px;
+    height: 55px;
+    border-radius: 5px;
+    overflow: hidden;
+    border: 1.5px solid rgba(200,168,75,0.4);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .captured-frame:hover { border-color: var(--gold); }
+  .captured-frame.selected { border-color: var(--gold); box-shadow: 0 0 8px rgba(200,168,75,0.3); }
+
+  .captured-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .captured-frame .frame-remove {
+    position: absolute;
+    top: 2px; right: 2px;
+    width: 14px; height: 14px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: #fff;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .captured-frame:hover .frame-remove { opacity: 1; }
+
+  .captured-frame .frame-label-tag {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.6);
+    font-family: 'DM Mono', monospace;
+    font-size: 7px;
+    color: var(--gold);
+    text-align: center;
+    padding: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  .capture-btn {
+    background: none;
+    border: 1px solid rgba(200,168,75,0.35);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .capture-btn:hover { background: rgba(200,168,75,0.1); }
+
+  .frame-guide-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .frame-positions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .pos-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 4px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+
+  .pos-tag:hover { border-color: rgba(200,168,75,0.4); color: var(--gold); }
+
+  /* Context input */
+  .analysis-context {
+    margin-bottom: 16px;
+  }
+
+  .context-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .context-input {
+    width: 100%;
+    background: var(--fairway);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--cream);
+    font-family: 'Crimson Pro', serif;
+    font-size: 15px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    outline: none;
+    resize: vertical;
+    min-height: 70px;
+    line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+
+  .context-input:focus { border-color: rgba(200,168,75,0.4); }
+  .context-input::placeholder { color: rgba(255,255,255,0.2); }
+
+  /* Analyze button */
+  .analyze-btn {
+    width: 100%;
+    background: var(--gold);
+    border: none;
+    color: var(--ink);
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 900;
+    padding: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+  }
+
+  .analyze-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* Results */
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .results-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .results-frames {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .results-frame-thumb {
+    width: 90px;
+    height: 62px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1.5px solid rgba(200,168,75,0.3);
+  }
+
+  .results-frame-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .results-loading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 24px 0;
+  }
+
+  .results-dots {
+    display: flex;
+    gap: 5px;
+  }
+
+  .results-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: dot-pulse 1.2s ease-in-out infinite;
+  }
+
+  .results-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .results-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  .results-loading-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  .results-content {
+    font-size: 16px;
+    color: var(--cream);
+    line-height: 1.75;
+  }
+
+  .results-content p { margin-bottom: 16px; }
+
+  .results-content strong { color: var(--white); font-weight: 600; }
+  .results-content em { color: var(--gold); font-style: italic; }
+
+  .results-section-head {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin: 24px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(200,168,75,0.2);
+  }
+
+  .results-followup {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .followup-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .followup-bar {
+    display: flex;
+    gap: 8px;
+  }
+
+
+    .hero-title { font-size: 28px; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .week-grid { grid-template-columns: repeat(8, 1fr); }
+    .nav-tabs { gap: 0; }
+    .nav-tab { padding: 6px 10px; font-size: 9px; }
+    .hero-header { grid-template-columns: 1fr; }
+  }
+
+  /* ── COACH DRAWER ── */
+  .info-btn {
+    background: none;
+    border: 1px solid rgba(200,168,75,0.25);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .info-btn:hover {
+    background: rgba(200,168,75,0.15);
+    border-color: var(--gold);
+  }
+
+  .coach-drawer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--ink2);
+    border-top: 1px solid rgba(200,168,75,0.3);
+    border-radius: 18px 18px 0 0;
+    z-index: 300;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    max-height: 75vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .coach-drawer.open {
+    transform: translateY(0);
+  }
+
+  .drawer-handle {
+    width: 36px;
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    margin: 12px auto 0;
+    flex-shrink: 0;
+  }
+
+  .drawer-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 14px 20px 10px;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .drawer-topic {
+    flex: 1;
+  }
+
+  .drawer-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .drawer-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.2;
+  }
+
+  .drawer-close {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--muted);
+    font-size: 14px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: 12px;
+    margin-top: 2px;
+    transition: all 0.2s;
+  }
+  .drawer-close:hover { border-color: rgba(255,255,255,0.3); color: var(--cream); }
+
+  .drawer-body {
+    padding: 16px 20px 32px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .drawer-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 14px;
+  }
+
+  .drawer-dots {
+    display: flex;
+    gap: 4px;
+  }
+
+  .drawer-dots span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: dot-pulse 1.2s ease-in-out infinite;
+  }
+  .drawer-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .drawer-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dot-pulse {
+    0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  .drawer-content {
+    font-size: 15px;
+    color: var(--cream);
+    line-height: 1.7;
+  }
+
+  .drawer-content p { margin-bottom: 12px; }
+  .drawer-content p:last-child { margin-bottom: 0; }
+
+  .drawer-content strong {
+    color: var(--white);
+    font-weight: 600;
+  }
+
+  .drawer-content em {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .drawer-content .drill-example {
+    background: rgba(255,255,255,0.04);
+    border-left: 2px solid var(--gold);
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    margin: 10px 0;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 299;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .drawer-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Ask anything bar */
+  .ask-bar {
+    display: flex;
+    gap: 8px;
+    padding: 10px 20px 14px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+
+  .ask-input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--cream);
+    font-family: 'Crimson Pro', serif;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .ask-input:focus { border-color: rgba(200,168,75,0.4); }
+  .ask-input::placeholder { color: rgba(255,255,255,0.2); }
+
+  .ask-send {
+    background: var(--gold);
+    border: none;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .ask-send:hover { background: var(--gold-light); }
+  .ask-send:disabled { opacity: 0.5; cursor: not-allowed; }
+</style>
+
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">Swing Coach</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('dashboard')">Dashboard</button>
+    <button class="nav-tab" onclick="showPage('course')">On Course</button>
+    <button class="nav-tab" onclick="showPage('analyze')">👁 Analyze</button>
+    <button class="nav-tab" onclick="showPage('progress')">Progress</button>
+    <button class="nav-tab" onclick="showPage('science')">Science</button>
+  </div>
+  <div class="nav-phase">Phase <span id="nav-phase-num">1</span> · Wk <span id="nav-week-num">1</span> &nbsp;<button onclick="openCoach('Ask the Coach', 'The golfer wants to ask you something directly. Greet them briefly as the world\'s number one coach would — with authority and warmth — then invite their question in one sentence.')" style="background:rgba(200,168,75,0.15);border:1px solid rgba(200,168,75,0.3);color:var(--gold);font-family:\'DM Mono\',monospace;font-size:8px;padding:3px 8px;border-radius:3px;cursor:pointer;letter-spacing:0.08em;transition:all 0.2s;" onmouseover="this.style.background=\'rgba(200,168,75,0.25)\'" onmouseout="this.style.background=\'rgba(200,168,75,0.15)\'">ASK</button></div>
+</nav>
+
+<main>
+
+  <!-- ── DASHBOARD ── -->
+  <div id="page-dashboard" class="page active">
+    <div class="hero">
+
+      <div class="hero-header">
+        <div>
+          <div class="hero-eyebrow">Swing Change Coach</div>
+          <div class="hero-title">Build the New<br><em>Highway.</em></div>
+          <div class="hero-subtitle" id="hero-subtitle">You're not unlearning your old pattern — you're building a competing one.</div>
+        </div>
+        <div class="week-badge">
+          <div class="num" id="week-display">1</div>
+          <div class="label">Week</div>
+        </div>
+      </div>
+
+      <!-- Phase bar -->
+      <div class="phase-bar">
+        <div class="phase-seg"><div class="phase-seg-fill" id="pseg1" style="width:0%"></div></div>
+        <div class="phase-seg"><div class="phase-seg-fill" id="pseg2" style="width:0%"></div></div>
+        <div class="phase-seg"><div class="phase-seg-fill" id="pseg3" style="width:0%"></div></div>
+        <div class="phase-seg"><div class="phase-seg-fill" id="pseg4" style="width:0%"></div></div>
+      </div>
+      <div class="phase-labels">
+        <div class="phase-lbl" id="pl1">Phase 1 · Deconstruct</div>
+        <div class="phase-lbl" id="pl2">Phase 2 · Encode</div>
+        <div class="phase-lbl" id="pl3">Phase 3 · Consolidate</div>
+        <div class="phase-lbl" id="pl4">Phase 4 · Compete</div>
+      </div>
+
+      <!-- Plateau warning (shows weeks 3-4) -->
+      <div class="plateau-banner" id="plateau-banner">
+        <div class="plateau-title">
+          ⚠ The Plateau Zone
+          <button class="info-btn" title="What is happening right now?" onclick="openCoach('The Plateau Zone', SECTION_CONTEXTS['plateau'])">?</button>
+        </div>
+        <div class="plateau-text">You may feel worse right now. This is neurologically normal — the old pattern is losing dominance before the new one takes over. Do not retreat. Stay in Phase 2 protocol. Push through.</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-label">Sessions Logged</div>
+          <div class="card-value" id="stat-sessions">0</div>
+          <div class="card-sub">this program</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Current Phase</div>
+          <div class="card-value" id="stat-phase">1</div>
+          <div class="card-sub" id="stat-phase-name">Deconstruction</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Days Until Phase 2</div>
+          <div class="card-value" id="stat-days">14</div>
+          <div class="card-sub">keep building</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Process Score</div>
+          <div class="card-value" id="stat-process">—</div>
+          <div class="card-sub">last round</div>
+        </div>
+      </div>
+
+      <!-- Motivation -->
+      <div class="motivation" id="motivation-box">
+        <div class="motivation-text" id="motivation-text">Loading your daily reminder...</div>
+        <div class="motivation-source" id="motivation-source"></div>
+      </div>
+
+      <!-- Today's Protocol -->
+      <div class="protocol-card">
+        <div class="protocol-title" id="today-protocol-title">Today's Practice Protocol</div>
+        <ul class="drill-list" id="drill-list"></ul>
+      </div>
+
+      <button class="log-session-btn" onclick="openModal()">+ Log Today's Session</button>
+    </div>
+  </div>
+
+  <!-- ── ON COURSE ── -->
+  <div id="page-course" class="page">
+    <div class="course-page">
+      <div class="section-eyebrow">On-Course Protocol</div>
+      <div class="section-heading">Every Shot,<br>Every Time.</div>
+
+      <!-- Your cue -->
+      <div class="cue-box">
+        <div class="cue-label">Your Trigger Cue</div>
+        <input class="cue-input" id="cue-input" placeholder="e.g. Shallow" maxlength="40" oninput="saveCue()">
+        <div class="cue-hint">One word or image. External or feeling-based. Never positional.</div>
+      </div>
+
+      <!-- Shot protocol steps -->
+      <div class="shot-protocol" id="shot-protocol"></div>
+
+      <div class="divider"></div>
+
+      <!-- Breathing reset -->
+      <div class="breathe-widget">
+        <div class="breathe-title">Bad Shot Reset · Box Breathing</div>
+        <div class="breathe-circle" id="breathe-circle" onclick="startBreathing()">TAP</div>
+        <div class="breathe-instruction" id="breathe-instruction">Tap to reset after a bad shot</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Post-round check -->
+      <div class="round-check">
+        <div class="round-check-title">Post-Round Process Check</div>
+        <div id="yn-rows"></div>
+        <div class="round-score-display">
+          <div class="round-score-label">Process Score</div>
+          <div class="round-score-val" id="yn-score">—/3</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── PROGRESS ── -->
+  <div id="page-progress" class="page">
+    <div class="progress-page">
+      <div class="section-eyebrow">16-Week Journey</div>
+      <div class="section-heading">Your Progress</div>
+
+      <div class="week-grid" id="week-grid"></div>
+
+      <div class="divider"></div>
+
+      <div class="section-eyebrow" style="margin-bottom:12px">Session Log</div>
+      <div class="session-log" id="session-log-list">
+        <div style="color:var(--muted); font-style:italic; font-size:14px;">No sessions logged yet. Start building that highway.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ANALYZE ── -->
+  <div id="page-analyze" class="page">
+    <div class="analyze-page">
+
+      <div class="section-eyebrow">Vision Analysis</div>
+      <div class="section-heading">Coach Eyes On<br><em>Your Swing.</em></div>
+      <div class="analyze-intro">Load your swing and a model swing side by side. The coach reads both and tells you exactly what the best ball strikers do that you don't — and how to close that gap.</div>
+
+      <!-- ── DUAL VIDEO LOADER ── -->
+      <div class="dual-video-grid" id="dual-video-grid">
+
+        <!-- YOUR SWING -->
+        <div class="video-slot" id="slot-yours">
+          <div class="slot-header">
+            <div class="slot-eyebrow">Your Swing</div>
+            <button class="slot-clear-btn" id="yours-clear" onclick="clearSlot('yours')" style="display:none">✕</button>
+          </div>
+          <div class="slot-drop" id="yours-drop" onclick="document.getElementById('yours-file').click()" ondragover="handleDragOver(event,'yours-drop')" ondragleave="handleDragLeave(event,'yours-drop')" ondrop="handleDrop(event,'yours')">
+            <div class="slot-drop-icon">🏌️</div>
+            <div class="slot-drop-title">Your Swing</div>
+            <div class="slot-drop-sub">MP4 · MOV · any angle</div>
+            <input type="file" id="yours-file" accept="video/*" style="display:none" onchange="loadSlot('yours', this.files[0])">
+          </div>
+          <div class="slot-player" id="yours-player" style="display:none">
+            <video id="yours-video" muted playsinline preload="metadata"></video>
+            <div class="slot-scrub-row">
+              <input type="range" class="scrubber-input" id="yours-scrubber" min="0" max="100" value="0" step="0.01" oninput="scrubSlot('yours', this.value)">
+            </div>
+            <div class="slot-pos-tags">
+              <span class="pos-tag" onclick="tagAndCapture('yours','Address')">Address</span>
+              <span class="pos-tag" onclick="tagAndCapture('yours','Takeaway')">Takeaway</span>
+              <span class="pos-tag" onclick="tagAndCapture('yours','Top')">Top</span>
+              <span class="pos-tag" onclick="tagAndCapture('yours','Transition')">Transition</span>
+              <span class="pos-tag" onclick="tagAndCapture('yours','Impact')">Impact</span>
+              <span class="pos-tag" onclick="tagAndCapture('yours','Follow')">Follow</span>
+            </div>
+            <button class="capture-btn" onclick="captureSlotFrame('yours')">+ Capture Frame</button>
+            <div class="slot-thumbs" id="yours-thumbs"></div>
+          </div>
+        </div>
+
+        <!-- MODEL SWING -->
+        <div class="video-slot" id="slot-model">
+          <div class="slot-header">
+            <div class="slot-eyebrow">Model Swing</div>
+            <button class="slot-clear-btn" id="model-clear" onclick="clearSlot('model')" style="display:none">✕</button>
+          </div>
+          <div class="slot-drop" id="model-drop" onclick="document.getElementById('model-file').click()" ondragover="handleDragOver(event,'model-drop')" ondragleave="handleDragLeave(event,'model-drop')" ondrop="handleDrop(event,'model')">
+            <div class="slot-drop-icon">🏆</div>
+            <div class="slot-drop-title">Model Swing</div>
+            <div class="slot-drop-sub">Tiger · anyone · your target</div>
+            <input type="file" id="model-file" accept="video/*" style="display:none" onchange="loadSlot('model', this.files[0])">
+          </div>
+          <div class="slot-player" id="model-player" style="display:none">
+            <video id="model-video" muted playsinline preload="metadata"></video>
+            <div class="slot-scrub-row">
+              <input type="range" class="scrubber-input" id="model-scrubber" min="0" max="100" value="0" step="0.01" oninput="scrubSlot('model', this.value)">
+            </div>
+            <div class="slot-pos-tags">
+              <span class="pos-tag" onclick="tagAndCapture('model','Address')">Address</span>
+              <span class="pos-tag" onclick="tagAndCapture('model','Takeaway')">Takeaway</span>
+              <span class="pos-tag" onclick="tagAndCapture('model','Top')">Top</span>
+              <span class="pos-tag" onclick="tagAndCapture('model','Transition')">Transition</span>
+              <span class="pos-tag" onclick="tagAndCapture('model','Impact')">Impact</span>
+              <span class="pos-tag" onclick="tagAndCapture('model','Follow')">Follow</span>
+            </div>
+            <button class="capture-btn" onclick="captureSlotFrame('model')">+ Capture Frame</button>
+            <div class="slot-thumbs" id="model-thumbs"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── SINGLE VIDEO FALLBACK (camera) ── -->
+      <div class="single-video-alt">
+        <button class="single-camera-btn" id="cam-toggle-btn" onclick="toggleCameraPanel()">
+          <span>◉</span> Or record live with camera
+        </button>
+      </div>
+
+      <div id="camera-panel" style="display:none" class="analyze-panel">
+        <div class="camera-container">
+          <video id="camera-preview" autoplay muted playsinline></video>
+          <div class="camera-overlay"><div class="camera-tip">Face-on or down-the-line</div></div>
+        </div>
+        <div class="camera-controls">
+          <button class="cam-btn" id="cam-start-btn" onclick="startCamera()">Start Camera</button>
+          <button class="cam-btn cam-record" id="cam-record-btn" onclick="toggleRecording()" style="display:none">⏺ Record</button>
+          <button class="cam-btn cam-stop" id="cam-stop-btn" onclick="stopCamera()" style="display:none">Stop</button>
+        </div>
+        <div id="camera-status" class="camera-status"></div>
+      </div>
+
+      <!-- ── ANALYSIS MODE + BUTTON ── -->
+      <div id="analysis-setup" style="display:none">
+
+        <div class="analysis-context">
+          <div class="context-label">Coach approach</div>
+          <div class="analysis-mode-grid">
+            <div class="analysis-mode-card active" id="mode-cold" onclick="setReadMode('cold')">
+              <div class="amode-icon">👁</div>
+              <div class="amode-title">Cold Read</div>
+              <div class="amode-desc">Fresh eyes. Diagnose the primary fault and what needs to change to be a great ball striker.</div>
+            </div>
+            <div class="analysis-mode-card" id="mode-compare" onclick="setReadMode('compare')">
+              <div class="amode-icon">⚡</div>
+              <div class="amode-title">Gap Analysis</div>
+              <div class="amode-desc">Compare your swing to the model frame by frame. Identify the exact delta and how to close it.</div>
+            </div>
+            <div class="analysis-mode-card" id="mode-targeted" onclick="setReadMode('targeted')">
+              <div class="amode-icon">🎯</div>
+              <div class="amode-title">Targeted</div>
+              <div class="amode-desc">You know what you're working on. Coach checks your progress and refines the prescription.</div>
+            </div>
+          </div>
+          <div id="targeted-input-wrap" style="display:none; margin-top:12px;">
+            <textarea class="context-input" id="analysis-context-input" placeholder="What are you working on?"></textarea>
+          </div>
+          <div id="cold-read-note" style="margin-top:10px;">
+            <div class="cold-note-text">The coach reads your swing cold — sequence, positions, primary fault, and a prioritized change plan.</div>
+          </div>
+          <div id="compare-note" style="display:none; margin-top:10px;">
+            <div class="cold-note-text">The coach compares matching positions between your swing and the model — exact differences, priority order, and the one change that closes the gap fastest.</div>
+          </div>
+        </div>
+
+        <button class="analyze-btn" id="analyze-btn" onclick="runSwingAnalysis()">
+          <span id="analyze-btn-text">Show the Coach My Swing</span>
+        </button>
+      </div>
+
+      <!-- ── RESULTS ── -->
+      <div id="analysis-results" style="display:none">
+        <div class="results-header">
+          <div class="results-eyebrow">World No. 1 Coach · Swing Analysis</div>
+          <button class="reset-btn" onclick="resetAnalysis()">New Analysis</button>
+        </div>
+
+        <div id="results-compare-grid" class="results-compare-grid" style="display:none"></div>
+        <div class="results-frames" id="results-frames"></div>
+
+        <div class="results-loading" id="results-loading">
+          <div class="results-dots"><span></span><span></span><span></span></div>
+          <div class="results-loading-text" id="results-loading-text">Reading your swing...</div>
+        </div>
+
+        <div id="results-content" class="results-content"></div>
+
+        <div id="results-followup" class="results-followup" style="display:none">
+          <div class="followup-label">Ask the coach about this swing</div>
+          <div class="followup-bar">
+            <input class="ask-input" id="results-ask-input" placeholder="Dig deeper..." onkeydown="if(event.key==='Enter') askAboutSwing()">
+            <button class="ask-send" onclick="askAboutSwing()">ASK</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SCIENCE ── -->
+  <div id="page-science" class="page">
+    <div class="science-page">
+      <div class="section-eyebrow">The Neuroscience</div>
+      <div class="section-heading">Why This Works</div>
+
+      <div id="science-cards"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── COACH DRAWER ── -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="coach-drawer" id="coach-drawer">
+  <div class="drawer-handle"></div>
+  <div class="drawer-header">
+    <div class="drawer-topic">
+      <div class="drawer-eyebrow" id="drawer-eyebrow">The Coach</div>
+      <div class="drawer-title" id="drawer-title">Loading...</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawer-body">
+    <div class="drawer-loading" id="drawer-loading">
+      <div class="drawer-dots"><span></span><span></span><span></span></div>
+      Thinking...
+    </div>
+    <div class="drawer-content" id="drawer-content" style="display:none"></div>
+  </div>
+  <div class="ask-bar">
+    <input class="ask-input" id="ask-input" placeholder="Ask a follow-up question..." onkeydown="if(event.key==='Enter') askFollowUp()">
+    <button class="ask-send" id="ask-send" onclick="askFollowUp()">ASK</button>
+  </div>
+</div>
+
+<!-- ── LOG SESSION MODAL ── -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-title">Log Session</div>
+
+    <div class="modal-field">
+      <label class="modal-label">Session Type</label>
+      <select class="modal-select" id="log-type">
+        <option value="range">Range — Blocked Practice</option>
+        <option value="range-random">Range — Random/Variable</option>
+        <option value="mirror">Mirror / Slow Motion</option>
+        <option value="course">On Course / Simulator</option>
+        <option value="mental">Mental Rehearsal</option>
+      </select>
+    </div>
+
+    <div class="modal-field">
+      <label class="modal-label">Drills Completed</label>
+      <div class="check-group" id="modal-drill-checks"></div>
+    </div>
+
+    <div class="modal-field">
+      <label class="modal-label">Quick Note</label>
+      <textarea class="modal-textarea" id="log-note" placeholder="What did you feel? What fired? What held?"></textarea>
+    </div>
+
+    <div class="modal-field">
+      <label class="modal-label">Feel of New Pattern (1–10)</label>
+      <input class="modal-input" type="range" id="log-feel" min="1" max="10" value="5" oninput="updateFeelLabel(this.value)">
+      <div style="text-align:center; font-family:'DM Mono',monospace; font-size:11px; color:var(--gold); margin-top:4px;" id="feel-label">5 — Moderate</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveSession()">Save Session</button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+const STATE_KEY = 'swing_coach_v2';
+
+function loadState() {
+  try {
+    const s = localStorage.getItem(STATE_KEY);
+    return s ? JSON.parse(s) : null;
+  } catch(e) { return null; }
+}
+
+function saveState() {
+  localStorage.setItem(STATE_KEY, JSON.stringify(state));
+}
+
+const defaultState = {
+  week: 1,
+  sessions: [],
+  cue: '',
+  drillsDone: {},
+  ynAnswers: [null, null, null],
+};
+
+let state = loadState() || JSON.parse(JSON.stringify(defaultState));
+
+// ── DATA ───────────────────────────────────────────────────────────────────
+const PHASES = [
+  { num: 1, name: 'Deconstruction', weeks: [1,2], wkRange: '1–2',
+    desc: 'Interrupt the old pattern. Build motor primitives. No ball 70% of the time.' },
+  { num: 2, name: 'Encoding', weeks: [3,4,5], wkRange: '3–5',
+    desc: 'Transfer the new pattern to ball-striking with progressive challenge.' },
+  { num: 3, name: 'Consolidation', weeks: [6,7,8,9,10], wkRange: '6–10',
+    desc: 'Make the pattern robust under pressure. 70% course, 30% range.' },
+  { num: 4, name: 'Competition', weeks: [11,12,13,14,15,16], wkRange: '10–16',
+    desc: 'Play golf. Trust the pattern. Routine is everything.' },
+];
+
+const DRILLS_BY_PHASE = {
+  1: [
+    { id: 'slow-motion', name: 'Slow-Motion Rehearsal', desc: '10% speed · eyes closed · proprioceptive encoding', reps: '20 reps', type: 'mirror' },
+    { id: 'mirror', name: 'Mirror Work', desc: 'Visual + kinesthetic dual-encoding', reps: '10 reps', type: 'mirror' },
+    { id: 'constraint', name: 'Constraint Drill', desc: 'Physical constraint makes old pattern impossible', reps: '20 reps', type: 'range' },
+    { id: 'pause-check', name: 'Pause & Check', desc: 'Stop at key position · hold 3 seconds', reps: '15 reps', type: 'range' },
+  ],
+  2: [
+    { id: 'blocked', name: 'Blocked Practice', desc: 'New move · short irons · 50% speed · close targets', reps: '30 balls', type: 'range' },
+    { id: 'random', name: 'Random Practice', desc: 'Alternate clubs · vary targets · vary trajectory', reps: '20 balls', type: 'range' },
+    { id: 'interleave', name: 'Confidence Interleave', desc: 'Mix new pattern with shots you trust', reps: '15 balls', type: 'range' },
+    { id: 'game-like', name: 'Game-Like Session', desc: '9-hole sim or on-course shot game', reps: '9 holes', type: 'course' },
+  ],
+  3: [
+    { id: 'ctx-change-clubs', name: 'Change Clubs Every Shot', desc: 'Contextual interference — builds robustness', reps: '20 shots', type: 'range' },
+    { id: 'ctx-pressure', name: 'Time Pressure Drill', desc: 'Max 20 seconds per shot', reps: '15 shots', type: 'range' },
+    { id: 'speed-train', name: 'Speed Training', desc: 'SuperSpeed protocol — seal kinematic sequence', reps: '3 sets', type: 'range' },
+    { id: 'course-70', name: 'Course / Sim Play', desc: 'Full round with process focus · no swing thoughts', reps: '18 holes', type: 'course' },
+  ],
+  4: [
+    { id: 'full-routine', name: 'Full Pre-Shot Routine', desc: 'Identical routine every shot · this is the trigger', reps: 'every shot', type: 'course' },
+    { id: 'two-ball', name: 'Two-Ball Drill', desc: 'First: no cue. Second: one cue. Compare.', reps: '10 pairs', type: 'range' },
+    { id: 'compete', name: 'Competition Round', desc: 'Score is not the metric. Process is.', reps: '18 holes', type: 'course' },
+    { id: 'visualize', name: 'Mental Rehearsal', desc: '5 min vivid visualization · same circuits as physical', reps: '5 min', type: 'mental' },
+  ],
+};
+
+const SHOT_STEPS = [
+  { num: 1, title: 'Decision', keyword: 'COMMIT',
+    body: 'Full commitment to shot shape, target, and club. Zero swing thoughts here — pure golf thinking. This is your last moment of analysis.' },
+  { num: 2, title: 'Practice Swing = Feel Rehearsal', keyword: 'FEEL',
+    body: 'One swing. You are feeling the sensation of the new move — not checking positions. Feeling is cerebellar. Checking is cortical. One helps, one hurts.' },
+  { num: 3, title: 'One Trigger Cue', keyword: 'CUE',
+    body: 'Your single cue as you step in. Feeling-based or external — never positional. "Swing to the target" beats "keep the elbow in." This is your last conscious input.' },
+  { num: 4, title: 'Eyes on Target → Pull the Trigger', keyword: 'EXTERNAL',
+    body: 'Last thing your eyes see is the target. Not the ball. This activates external focus and suppresses internal (technical) processing.' },
+  { num: 5, title: 'Execute & Release', keyword: 'TRUST',
+    body: 'Zero swing thoughts during the motion. If a thought appears — let it pass like weather. Don\'t fight it, don\'t follow it.' },
+  { num: 6, title: 'Post-Shot: Neutral Affect', keyword: 'NEUTRAL',
+    body: 'Good shot → move on. Bad shot → same. No post-swing analysis on the course. Frustration encodes failure patterns. Neutrality keeps the nervous system calm.' },
+];
+
+const YN_QUESTIONS = [
+  'Did I commit to the cue and let go?',
+  'Did I stay neutral after bad shots?',
+  'Did I feel the new pattern even on mishits?',
+];
+
+const SCIENCE_CARDS = [
+  { name: "Hebb's Law", text: "<strong>Neurons that fire together, wire together.</strong> Every correct repetition adds myelin to the new pathway. Repetition at the <em>right</em> speed — slow enough to avoid the old pattern firing — is the engine of change." },
+  { name: "Contextual Interference Effect", text: "<strong>Blocked practice feels productive but encodes shallowly.</strong> Variable and random practice is harder, more frustrating, and encodes far deeper. Schmidt & Bjork's research is definitive: the struggle is the learning." },
+  { name: "OPTIMAL Theory (Wulf)", text: "<strong>External focus outperforms internal focus for skilled performers.</strong> 'Swing to the target' produces better movement than 'keep the elbow in.' Your conscious mind is 300ms behind a swing that lasts 200ms." },
+  { name: "Movement Variability (Bernstein)", text: "<strong>The brain learns movement categories, not exact positions.</strong> Practicing in varied conditions builds a robust, adaptable pattern — not a fragile one that only works on the range." },
+  { name: "Sleep Consolidation", text: "<strong>Motor learning consolidates during deep sleep.</strong> Practicing before bed > practicing in the morning for new pattern acquisition. Every session you log is being processed overnight." },
+  { name: "Amygdala Hijack", text: "<strong>Under pressure, your brain defaults to the most myelinated pathway — the old swing.</strong> The antidote is not willpower. It is a consistent pre-shot routine that triggers the cerebellum to take over before the amygdala intervenes." },
+  { name: "The Plateau Phenomenon", text: "<strong>Weeks 3–4 will feel worse.</strong> The old pattern is losing dominance but the new one isn't automatic yet. This is the crossing-over phase — the most important time to hold the course. Most golfers quit here and conclude the change 'doesn't work.' It is working." },
+  { name: "Distributed vs. Massed Practice", text: "<strong>30 minutes every day beats 3.5 hours on Saturday.</strong> Distributed practice allows sleep consolidation between sessions. The nervous system needs recovery time to build new neural infrastructure." },
+];
+
+const MOTIVATIONS = [
+  { text: "The change happens on the practice tee. On the course your only job is to trust it.", source: "On-Course Protocol" },
+  { text: "You are not fighting your old swing. You are building a faster road beside it.", source: "Neuroscience Principle" },
+  { text: "Frustration is information. Neutrality is strategy.", source: "Post-Shot Protocol" },
+  { text: "The plateau is proof it's working. Hold the course.", source: "Week 3–4 Warning" },
+  { text: "Slow motion today is full speed in six weeks.", source: "Phase 1 Protocol" },
+  { text: "Every rep at the right speed is myelin. You are literally building the new pattern.", source: "Hebb's Law" },
+  { text: "Process is the metric right now. Score follows commitment.", source: "Scorecard Mindset" },
+  { text: "The cerebellum knows the move. Your job is to get your thinking mind out of the way.", source: "On-Course Protocol" },
+];
+
+const FEEL_LABELS = {
+  1: '1 — Old pattern dominated', 2: '2 — Mostly old', 3: '3 — Slipping back',
+  4: '4 — Inconsistent', 5: '5 — Moderate', 6: '6 — More new than old',
+  7: '7 — New pattern emerging', 8: '8 — Feeling it', 9: '9 — Dialed in',
+  10: '10 — Owned it',
+};
+
+// ── UTILITIES ─────────────────────────────────────────────────────────────
+function getPhase(week) {
+  for (const p of PHASES) if (p.weeks.includes(week)) return p;
+  return PHASES[3];
+}
+
+function getCurrentDrills() {
+  const p = getPhase(state.week);
+  return DRILLS_BY_PHASE[p.num] || DRILLS_BY_PHASE[1];
+}
+
+function todayKey() {
+  return new Date().toISOString().slice(0,10);
+}
+
+// ── PAGES ─────────────────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const tabs = document.querySelectorAll('.nav-tab');
+  const names = ['dashboard','course','analyze','progress','science'];
+  const idx = names.indexOf(name);
+  if (idx >= 0) tabs[idx].classList.add('active');
+
+  if (name === 'progress') renderProgress();
+  if (name === 'course') renderCourse();
+  if (name === 'science') renderScience();
+  if (name === 'analyze') {
+    // Reset analyze btn state
+    const btn = document.getElementById('analyze-btn');
+    if (btn && !capturedFrames.length) { btn.disabled = true; btn.style.opacity = '0.4'; }
+  }
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────
+function renderDashboard() {
+  const phase = getPhase(state.week);
+
+  // Nav
+  document.getElementById('nav-phase-num').textContent = phase.num;
+  document.getElementById('nav-week-num').textContent = state.week;
+  document.getElementById('week-display').textContent = state.week;
+
+  // Stats
+  document.getElementById('stat-sessions').textContent = state.sessions.length;
+  document.getElementById('stat-phase').textContent = phase.num;
+  document.getElementById('stat-phase-name').textContent = phase.name;
+
+  const phaseEndWeek = Math.max(...phase.weeks);
+  const weeksLeft = phaseEndWeek - state.week;
+  const nextPhaseIdx = PHASES.findIndex(p => p.num === phase.num);
+  const nextPhase = PHASES[nextPhaseIdx + 1];
+
+  if (nextPhase) {
+    document.getElementById('stat-days').textContent = weeksLeft * 7;
+    const el = document.querySelector('.card:nth-child(3) .card-sub');
+    if (el) el.textContent = 'until Phase ' + nextPhase.num;
+  } else {
+    document.getElementById('stat-days').textContent = '∞';
+    const el = document.querySelector('.card:nth-child(3) .card-sub');
+    if (el) el.textContent = 'you\'re competing';
+  }
+
+  // Process score from last round
+  const rounds = state.sessions.filter(s => s.type === 'course');
+  if (rounds.length && rounds[rounds.length-1].ynScore !== undefined) {
+    document.getElementById('stat-process').textContent = rounds[rounds.length-1].ynScore + '/3';
+  }
+
+  // Phase bar
+  const phaseWeeks = [2,3,5,6];
+  PHASES.forEach((p, i) => {
+    const el = document.getElementById('pseg' + (i+1));
+    if (!el) return;
+    if (state.week > Math.max(...p.weeks)) el.style.width = '100%';
+    else if (state.week >= Math.min(...p.weeks)) {
+      const done = state.week - Math.min(...p.weeks);
+      const total = p.weeks.length;
+      el.style.width = Math.round((done / total) * 100) + '%';
+    } else el.style.width = '0%';
+  });
+
+  // Phase labels
+  PHASES.forEach((p, i) => {
+    const el = document.getElementById('pl' + (i+1));
+    if (!el) return;
+    el.classList.toggle('active', p.num === phase.num);
+    // Add info button if not already there
+    if (!el.querySelector('.info-btn')) {
+      const btn = document.createElement('button');
+      btn.className = 'info-btn';
+      btn.title = 'Explain this phase';
+      btn.textContent = '?';
+      btn.onclick = (e) => { e.stopPropagation(); openCoach('Phase ' + p.num + ': ' + p.name, PHASE_CONTEXTS[p.num]); };
+      el.appendChild(btn);
+    }
+  });
+
+  // Hero subtitle
+  document.getElementById('hero-subtitle').textContent = phase.desc;
+
+  // Plateau warning
+  document.getElementById('plateau-banner').classList.toggle('show', state.week === 3 || state.week === 4);
+
+  // Motivation (rotate daily)
+  const dayIdx = Math.floor(Date.now() / 86400000) % MOTIVATIONS.length;
+  const m = MOTIVATIONS[dayIdx];
+  document.getElementById('motivation-text').textContent = m.text;
+  document.getElementById('motivation-source').textContent = '— ' + m.source;
+
+  // Today title
+  document.getElementById('today-protocol-title').textContent =
+    'Phase ' + phase.num + ' · ' + phase.name + ' Protocol';
+
+  // Drills
+  renderDrills();
+
+  // Week nav buttons (week controls embedded below)
+  renderWeekControls();
+}
+
+function renderDrills() {
+  const drills = getCurrentDrills();
+  const todayDone = state.drillsDone[todayKey()] || [];
+  const list = document.getElementById('drill-list');
+  list.innerHTML = '';
+
+  drills.forEach(d => {
+    const done = todayDone.includes(d.id);
+    const li = document.createElement('li');
+    li.className = 'drill-item' + (done ? ' done' : '');
+    li.innerHTML = `
+      <div class="drill-check"></div>
+      <div style="flex:1">
+        <div class="drill-name">
+          ${d.name}
+          <button class="info-btn" title="Explain this drill" onclick="event.stopPropagation(); openCoach('${d.name}', ${JSON.stringify(DRILL_CONTEXTS[d.id] || null)})">?</button>
+        </div>
+        <div class="drill-desc">${d.desc}</div>
+      </div>
+      <div class="drill-reps">${d.reps}</div>
+    `;
+    li.onclick = (e) => { if (!e.target.classList.contains('info-btn')) toggleDrill(d.id); };
+    list.appendChild(li);
+  });
+}
+
+function toggleDrill(id) {
+  const key = todayKey();
+  if (!state.drillsDone[key]) state.drillsDone[key] = [];
+  const arr = state.drillsDone[key];
+  const idx = arr.indexOf(id);
+  if (idx >= 0) arr.splice(idx, 1);
+  else arr.push(id);
+  saveState();
+  renderDrills();
+}
+
+function renderWeekControls() {
+  // Remove old controls if exist
+  const existing = document.getElementById('week-controls');
+  if (existing) existing.remove();
+
+  const container = document.querySelector('.hero');
+  const div = document.createElement('div');
+  div.id = 'week-controls';
+  div.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-top:8px;';
+
+  div.innerHTML = `
+    <button onclick="changeWeek(-1)" style="background:var(--fairway);border:1px solid rgba(255,255,255,0.1);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;padding:8px 16px;border-radius:5px;cursor:pointer;letter-spacing:0.1em;transition:all 0.2s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--muted)'">← PREV WEEK</button>
+    <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.1em;">WEEK ${state.week} OF 16</span>
+    <button onclick="changeWeek(1)" style="background:var(--fairway);border:1px solid rgba(255,255,255,0.1);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;padding:8px 16px;border-radius:5px;cursor:pointer;letter-spacing:0.1em;transition:all 0.2s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--muted)'">NEXT WEEK →</button>
+  `;
+  container.appendChild(div);
+}
+
+function changeWeek(delta) {
+  state.week = Math.max(1, Math.min(16, state.week + delta));
+  saveState();
+  renderDashboard();
+}
+
+// ── ON COURSE ──────────────────────────────────────────────────────────────
+function renderCourse() {
+  // Cue
+  document.getElementById('cue-input').value = state.cue || '';
+
+  // Add info btn to cue label if not there
+  const cueLabel = document.querySelector('.cue-label');
+  if (cueLabel && !cueLabel.querySelector('.info-btn')) {
+    const btn = document.createElement('button');
+    btn.className = 'info-btn';
+    btn.textContent = '?';
+    btn.title = 'What makes a good trigger cue?';
+    btn.onclick = () => openCoach('The Trigger Cue', SECTION_CONTEXTS['cue']);
+    cueLabel.appendChild(btn);
+  }
+
+  // Add info btn to breathe title if not there
+  const breatheTitle = document.querySelector('.breathe-title');
+  if (breatheTitle && !breatheTitle.querySelector('.info-btn')) {
+    const btn = document.createElement('button');
+    btn.className = 'info-btn';
+    btn.textContent = '?';
+    btn.title = 'Why does box breathing help?';
+    btn.onclick = () => openCoach('Box Breathing Reset', SECTION_CONTEXTS['breathing']);
+    breatheTitle.appendChild(btn);
+  }
+
+  // Add info btn to process check title if not there
+  const roundTitle = document.querySelector('.round-check-title');
+  if (roundTitle && !roundTitle.querySelector('.info-btn')) {
+    const btn = document.createElement('button');
+    btn.className = 'info-btn';
+    btn.textContent = '?';
+    btn.title = 'Why is process the metric?';
+    btn.onclick = () => openCoach('Process Score', SECTION_CONTEXTS['process-score']);
+    roundTitle.appendChild(btn);
+  }
+
+  // Shot steps
+  const proto = document.getElementById('shot-protocol');
+  proto.innerHTML = '';
+  SHOT_STEPS.forEach((s, i) => {
+    const div = document.createElement('div');
+    div.className = 'shot-step' + (i === 0 ? ' active-step' : '');
+    div.innerHTML = `
+      <div class="shot-step-header" onclick="toggleStep(this)">
+        <div class="step-num">${s.num}</div>
+        <div class="step-title">${s.title}</div>
+        <div class="step-keyword">${s.keyword}</div>
+      </div>
+      <div class="step-body${i === 0 ? ' open' : ''}">
+        <p>${s.body}</p>
+      </div>
+    `;
+    proto.appendChild(div);
+  });
+
+  // Y/N rows
+  renderYN();
+}
+
+function toggleStep(header) {
+  const step = header.parentElement;
+  const body = step.querySelector('.step-body');
+  const wasOpen = body.classList.contains('open');
+
+  document.querySelectorAll('.shot-step').forEach(s => {
+    s.classList.remove('active-step');
+    s.querySelector('.step-body').classList.remove('open');
+  });
+
+  if (!wasOpen) {
+    step.classList.add('active-step');
+    body.classList.add('open');
+  }
+}
+
+function saveCue() {
+  state.cue = document.getElementById('cue-input').value;
+  saveState();
+}
+
+// Breathing
+let breatheInterval = null;
+let breathePhase = 0;
+const breathePhases = [
+  { label: 'INHALE', class: 'expanding', duration: 4000 },
+  { label: 'HOLD',   class: 'holding',   duration: 4000 },
+  { label: 'EXHALE', class: 'contracting', duration: 4000 },
+  { label: 'HOLD',   class: 'holding',   duration: 4000 },
+];
+let breatheCount = 0;
+
+function startBreathing() {
+  if (breatheInterval) {
+    clearInterval(breatheInterval);
+    breatheInterval = null;
+    const c = document.getElementById('breathe-circle');
+    c.className = 'breathe-circle';
+    c.textContent = 'TAP';
+    document.getElementById('breathe-instruction').textContent = 'Tap to reset after a bad shot';
+    breatheCount = 0;
+    return;
+  }
+
+  breatheCount = 0;
+  runBreathePhase();
+}
+
+function runBreathePhase() {
+  if (breatheCount >= 4 * 4) { // 4 full cycles
+    clearInterval(breatheInterval);
+    breatheInterval = null;
+    const c = document.getElementById('breathe-circle');
+    c.className = 'breathe-circle';
+    c.textContent = 'DONE';
+    document.getElementById('breathe-instruction').textContent = 'Reset complete. Next shot.';
+    setTimeout(() => {
+      c.textContent = 'TAP';
+      document.getElementById('breathe-instruction').textContent = 'Tap to reset after a bad shot';
+    }, 2000);
+    return;
+  }
+
+  const phase = breathePhases[breatheCount % 4];
+  const c = document.getElementById('breathe-circle');
+  c.className = 'breathe-circle ' + phase.class;
+  c.textContent = phase.label;
+  document.getElementById('breathe-instruction').textContent =
+    `${phase.label.toLowerCase()} for 4 seconds · cycle ${Math.floor(breatheCount/4)+1} of 4`;
+
+  breatheCount++;
+  breatheInterval = setTimeout(runBreathePhase, phase.duration);
+}
+
+// Y/N
+function renderYN() {
+  const container = document.getElementById('yn-rows');
+  if (!container) return;
+  container.innerHTML = '';
+
+  YN_QUESTIONS.forEach((q, i) => {
+    const row = document.createElement('div');
+    row.className = 'yes-no-row';
+    const ans = state.ynAnswers[i];
+    row.innerHTML = `
+      <div class="yn-question">${q}</div>
+      <div class="yn-btns">
+        <button class="yn-btn yes${ans === true ? ' selected' : ''}" onclick="setYN(${i}, true)">YES</button>
+        <button class="yn-btn no${ans === false ? ' selected' : ''}" onclick="setYN(${i}, false)">NO</button>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+  updateYNScore();
+}
+
+function setYN(idx, val) {
+  state.ynAnswers[idx] = val;
+  saveState();
+  renderYN();
+}
+
+function updateYNScore() {
+  const score = state.ynAnswers.filter(a => a === true).length;
+  const answered = state.ynAnswers.filter(a => a !== null).length;
+  const el = document.getElementById('yn-score');
+  if (!el) return;
+  el.textContent = answered === 0 ? '—/3' : score + '/3';
+  el.style.color = score === 3 ? 'var(--light-green)' : score >= 2 ? 'var(--gold)' : score === 1 ? 'var(--amber)' : 'var(--red)';
+}
+
+// ── PROGRESS ──────────────────────────────────────────────────────────────
+function renderProgress() {
+  // Week grid
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = '';
+  for (let w = 1; w <= 16; w++) {
+    const hasSessions = state.sessions.some(s => s.week === w);
+    const dot = document.createElement('div');
+    dot.className = 'week-dot ' + (w < state.week ? 'completed' : w === state.week ? 'current' : 'future');
+    dot.innerHTML = `<div class="week-dot-label">${w}</div>`;
+    dot.title = 'Week ' + w + (hasSessions ? ' ✓' : '');
+    if (hasSessions && w < state.week) dot.style.background = 'var(--gold)';
+    dot.onclick = () => {
+      state.week = w;
+      saveState();
+      renderDashboard();
+      renderProgress();
+    };
+    grid.appendChild(dot);
+  }
+
+  // Phase labels under grid
+  let phaseBar = document.getElementById('phase-bar-progress');
+  if (!phaseBar) {
+    phaseBar = document.createElement('div');
+    phaseBar.id = 'phase-bar-progress';
+    phaseBar.style.cssText = 'display:grid;grid-template-columns:2fr 3fr 5fr 6fr;gap:3px;margin-bottom:24px;margin-top:6px;';
+    PHASES.forEach(p => {
+      const d = document.createElement('div');
+      d.style.cssText = 'font-family:"DM Mono",monospace;font-size:7px;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase;text-align:center;';
+      d.textContent = 'Ph' + p.num + ' Wks ' + p.wkRange;
+      phaseBar.appendChild(d);
+    });
+    grid.parentNode.insertBefore(phaseBar, grid.nextSibling);
+  }
+
+  // Session log
+  const logList = document.getElementById('session-log-list');
+  if (!state.sessions.length) {
+    logList.innerHTML = '<div style="color:var(--muted); font-style:italic; font-size:14px;">No sessions logged yet. Start building that highway.</div>';
+    return;
+  }
+
+  logList.innerHTML = '';
+  [...state.sessions].reverse().forEach(s => {
+    const entry = document.createElement('div');
+    entry.className = 'session-entry';
+    const tagClass = s.type === 'course' ? 'tag-course' : s.type === 'mirror' ? 'tag-mirror' : 'tag-range';
+    const tagLabel = s.type === 'course' ? 'Course' : s.type === 'mirror' ? 'Mirror' : 'Range';
+    entry.innerHTML = `
+      <div class="session-date">${s.date}<br>Wk ${s.week}</div>
+      <div>
+        <div class="session-note">${s.note || 'No notes'}</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;">Feel: ${s.feel}/10</div>
+      </div>
+      <div class="session-tags">
+        <span class="tag ${tagClass}">${tagLabel}</span>
+        ${s.ynScore !== undefined ? `<span class="tag tag-course">${s.ynScore}/3</span>` : ''}
+      </div>
+    `;
+    logList.appendChild(entry);
+  });
+}
+
+// ── SCIENCE ───────────────────────────────────────────────────────────────
+function renderScience() {
+  const container = document.getElementById('science-cards');
+  if (container.children.length) return;
+
+  SCIENCE_CARDS.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'principle-card';
+    div.innerHTML = `
+      <div class="principle-name">
+        ${c.name}
+        <button class="info-btn" title="Ask the coach about this" onclick="openCoach('${c.name}', 'Explain ${c.name} in the context of my golf swing change program. Go deeper than the summary — give me the full picture of what this means for how I should practice and play.')">?</button>
+      </div>
+      <div class="principle-text">${c.text}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// ── LOG SESSION MODAL ─────────────────────────────────────────────────────
+function openModal() {
+  // Build drill checkboxes
+  const drills = getCurrentDrills();
+  const container = document.getElementById('modal-drill-checks');
+  container.innerHTML = '';
+  drills.forEach(d => {
+    const row = document.createElement('label');
+    row.className = 'check-row';
+    row.innerHTML = `<input type="checkbox" value="${d.id}"><span>${d.name}</span>`;
+    container.appendChild(row);
+  });
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+function updateFeelLabel(val) {
+  document.getElementById('feel-label').textContent = FEEL_LABELS[val] || val;
+}
+
+function saveSession() {
+  const type = document.getElementById('log-type').value;
+  const note = document.getElementById('log-note').value.trim();
+  const feel = parseInt(document.getElementById('log-feel').value);
+
+  const checkedDrills = [...document.querySelectorAll('#modal-drill-checks input:checked')].map(i => i.value);
+
+  // Also mark drills as done
+  const key = todayKey();
+  if (!state.drillsDone[key]) state.drillsDone[key] = [];
+  checkedDrills.forEach(id => {
+    if (!state.drillsDone[key].includes(id)) state.drillsDone[key].push(id);
+  });
+
+  const ynScore = state.ynAnswers.filter(a => a === true).length;
+
+  const session = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' }),
+    week: state.week,
+    type,
+    note: note || null,
+    feel,
+    drills: checkedDrills,
+    ynScore: type === 'course' ? ynScore : undefined,
+  };
+
+  state.sessions.push(session);
+  saveState();
+  closeModal();
+  renderDashboard();
+
+  // Reset note
+  document.getElementById('log-note').value = '';
+  document.getElementById('log-feel').value = 5;
+  updateFeelLabel(5);
+}
+
+// ── COACH DRAWER ──────────────────────────────────────────────────────────
+let drawerConversation = [];
+let drawerTopic = '';
+let drawerIsLoading = false;
+
+const COACH_SYSTEM = `You are the number one golf coach in the world. You have coached major champions, world number ones, and tour winners across every major tour. You have spent decades standing on ranges watching the best players alive build and rebuild their swings. You understand biomechanics at the deepest level — ground reaction forces, kinematic sequencing, pressure mapping, 3D motion capture. You understand sports neuroscience — motor learning theory, myelin, the cerebellum, amygdala responses under pressure. You have seen every pattern, every compensation, every mental block a golfer can have. And you know exactly what to say to cut through all of it.
+
+Your voice is authoritative but never arrogant. Precise but never cold. You speak the way the greatest coaches speak — with earned confidence, rare analogies, and the ability to make complex biomechanics feel like common sense. You have a gift for the perfect cue, the one sentence that unlocks something a player has been fighting for months. You do not waste words. When you speak, players listen, because every word has weight behind it.
+
+The golfer you are coaching right now is athletic and already understands the golf swing at a serious level. Do not explain basics. Do not patronize. Speak to them as a peer who happens to know more — a trusted expert they have earned access to. When something matters, say it plainly and with conviction. When something is subtle, honor the subtlety. You are not managing their feelings — you are building their game.
+
+When explaining drills or concepts: give the real reason it works, not the surface-level version. Connect the physical sensation to the neurological reality. Tell them what it feels like when it is right, what it feels like when it is wrong, and why that distinction matters. Speak in prose — flowing, confident, occasionally poetic when the moment calls for it. Never use bullet lists. 3 to 6 paragraphs. Leave them feeling sharper, more confident, and clearer than before they asked.`;
+
+async function openCoach(topic, context) {
+  drawerTopic = topic;
+  drawerConversation = [];
+
+  document.getElementById('drawer-eyebrow').textContent = 'World No. 1 Coach';
+  document.getElementById('drawer-title').textContent = topic;
+  document.getElementById('drawer-loading').style.display = 'flex';
+  document.getElementById('drawer-content').style.display = 'none';
+  document.getElementById('drawer-content').innerHTML = '';
+  document.getElementById('ask-input').value = '';
+
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.getElementById('coach-drawer').classList.add('open');
+
+  const prompt = context || `Explain "${topic}" in the context of my swing change program. What is it, why does it work neurologically, and how do I do it correctly?`;
+
+  await askCoach(prompt);
+}
+
+async function askCoach(prompt) {
+  if (drawerIsLoading) return;
+  drawerIsLoading = true;
+
+  document.getElementById('drawer-loading').style.display = 'flex';
+  document.getElementById('ask-send').disabled = true;
+
+  drawerConversation.push({ role: 'user', content: prompt });
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: COACH_SYSTEM,
+        messages: drawerConversation,
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content?.[0]?.text || 'Sorry, I could not load an explanation right now.';
+
+    drawerConversation.push({ role: 'assistant', content: text });
+
+    document.getElementById('drawer-loading').style.display = 'none';
+    const content = document.getElementById('drawer-content');
+    content.style.display = 'block';
+
+    // Render — append new response with a subtle separator if follow-up
+    if (drawerConversation.length > 2) {
+      const sep = document.createElement('div');
+      sep.style.cssText = 'height:1px;background:rgba(255,255,255,0.07);margin:14px 0;';
+      content.appendChild(sep);
+      const qDiv = document.createElement('div');
+      qDiv.style.cssText = 'font-family:"DM Mono",monospace;font-size:9px;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;';
+      qDiv.textContent = '↳ ' + drawerConversation[drawerConversation.length-2].content;
+      content.appendChild(qDiv);
+    }
+
+    const p = document.createElement('div');
+    p.className = 'drawer-content';
+    p.style.display = 'block';
+    // Format paragraphs
+    text.split('\n\n').filter(Boolean).forEach(para => {
+      const el = document.createElement('p');
+      el.innerHTML = para
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>');
+      p.appendChild(el);
+    });
+    content.appendChild(p);
+
+    // Scroll to bottom
+    const body = document.getElementById('drawer-body');
+    body.scrollTop = body.scrollHeight;
+
+  } catch(err) {
+    document.getElementById('drawer-loading').style.display = 'none';
+    const content = document.getElementById('drawer-content');
+    content.style.display = 'block';
+    content.innerHTML = '<p style="color:var(--muted);font-style:italic;">Could not reach the coach right now. Check your connection and try again.</p>';
+  }
+
+  drawerIsLoading = false;
+  document.getElementById('ask-send').disabled = false;
+}
+
+function askFollowUp() {
+  const input = document.getElementById('ask-input');
+  const q = input.value.trim();
+  if (!q || drawerIsLoading) return;
+  input.value = '';
+  askCoach(q);
+}
+
+function closeDrawer() {
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.getElementById('coach-drawer').classList.remove('open');
+}
+
+// ── DRILL INFO BUTTONS ────────────────────────────────────────────────────
+const DRILL_CONTEXTS = {
+  'slow-motion': 'Explain the slow-motion rehearsal drill for swing change. How slow exactly, why eyes closed, and what is happening neurologically when I do this?',
+  'mirror': 'Explain mirror work for motor learning a new golf swing. Why does visual plus kinesthetic dual-encoding work, and how should I use it in practice?',
+  'constraint': 'Explain constraint drills for golf swing change in detail. What are the best constraint drills, how do I set them up, and why do they force new neural pathways faster than just trying to think my way to the new position?',
+  'pause-check': 'Explain the pause and check drill for learning a new swing position. Why holding a position for 3 seconds works neurologically, and how to do it correctly.',
+  'blocked': 'Explain blocked practice for swing change. When should I use it, what are its limitations, and how does it differ from random practice neurologically?',
+  'random': 'Explain random and variable practice for golf swing change. Why does the contextual interference effect make this harder but more effective than blocked practice?',
+  'interleave': 'Explain confidence interleaving in golf practice — mixing the new swing pattern with trusted shots. Why does self-efficacy state matter for motor encoding?',
+  'game-like': 'Explain game-like practice for swing change consolidation. Why does playing or simulating real golf conditions transfer the new pattern better than pure range work?',
+  'ctx-change-clubs': 'Explain changing clubs every shot as a contextual interference drill. What is happening in the motor system and how does variability build a more robust swing pattern?',
+  'ctx-pressure': 'Explain time pressure drills for swing change consolidation. Why does limiting yourself to 20 seconds per shot accelerate pattern ownership?',
+  'speed-train': 'Explain speed training like SuperSpeed protocol in the context of a swing change program. Why should overspeed work only happen after the new pattern is established, and how does it seal the kinematic sequence?',
+  'course-70': 'Explain why 70% of practice should be on the course or simulator during consolidation phase, not the range. What transfer learning principles are at work here?',
+  'full-routine': 'Explain the pre-shot routine as a neural trigger for automatic swing execution. How does a consistent routine hand off from the analytical pre-motor cortex to the cerebellum?',
+  'two-ball': 'Explain the two-ball drill for building trust in a new swing pattern. Why does comparing a cueless shot to a cued shot build confidence and accelerate ownership?',
+  'compete': 'Explain how to approach competitive rounds while a swing change is still consolidating. What mindset and process focus is correct when score is not the metric yet?',
+  'visualize': 'Explain mental rehearsal and visualization for golf motor learning. What is happening neurologically, how vivid does it need to be, and when in the day is it most effective?',
+};
+
+const PHASE_CONTEXTS = {
+  1: 'Explain Phase 1 Deconstruction in depth. Why must I slow down below the speed at which the old pattern fires, and what specifically should I expect during these two weeks?',
+  2: 'Explain Phase 2 Encoding in depth. What is the difference between blocked and random practice sessions, how should I structure my week, and what does progress look like?',
+  3: 'Explain Phase 3 Consolidation in depth. What is contextual interference, why is 70% course work so important, and how do I know when I am ready for Phase 4?',
+  4: 'Explain Phase 4 Competition in depth. How do I trust a pattern that still feels unfamiliar under pressure? What is the correct mental approach during this phase?',
+};
+
+const SECTION_CONTEXTS = {
+  'two-brain': 'Explain the two-brain system in golf — the analytical pre-motor cortex versus the automatic cerebellum. How do I use each one correctly during a round, and why does trying to think during the swing make it worse?',
+  'plateau': 'Explain the swing change plateau in detail. What is happening neurologically in weeks 3 and 4, why do most golfers quit here, and what should I actually do when I feel like the change is not working?',
+  'neutral-affect': 'Explain why neutral affect after bad shots is so important during a swing change. What does the amygdala do to motor encoding when I react emotionally, and how do I train neutrality?',
+  'cue': 'Explain what makes a good trigger cue for a golf swing change. Why should it be external or feeling-based rather than positional? Give me examples of great cues versus poor cues.',
+  'breathing': 'Explain why box breathing resets the nervous system after a bad shot on the course. What is the cortisol response, how does breathing interrupt it, and why 4 counts specifically?',
+  'process-score': 'Explain why process is the metric during a swing change, not score. What are the three process questions measuring, and how should I interpret my score over multiple rounds?',
+};
+
+// ── SWING ANALYSIS ────────────────────────────────────────────────────────
+const slots = {
+  yours: { frames: [], videoEl: null },
+  model: { frames: [], videoEl: null },
+};
+let analysisConversation = [];
+let currentReadMode = 'cold';
+let cameraStream = null;
+let mediaRecorder = null;
+let recordedChunks = [];
+let cameraTargetSlot = 'yours';
+
+// ── SLOT MANAGEMENT ──
+function loadSlot(slot, file) {
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const vidEl = document.getElementById(slot + '-video');
+  vidEl.src = url;
+  slots[slot].videoEl = vidEl;
+  slots[slot].frames = [];
+  renderSlotThumbs(slot);
+
+  vidEl.onloadedmetadata = () => {
+    const scrubber = document.getElementById(slot + '-scrubber');
+    scrubber.max = vidEl.duration;
+    scrubber.step = vidEl.duration / 300;
+    scrubber.value = 0;
+  };
+
+  document.getElementById(slot + '-drop').style.display = 'none';
+  document.getElementById(slot + '-player').style.display = 'block';
+  document.getElementById(slot + '-clear').style.display = 'inline';
+  checkShowAnalysisSetup();
+}
+
+function clearSlot(slot) {
+  slots[slot].frames = [];
+  slots[slot].videoEl = null;
+  const vidEl = document.getElementById(slot + '-video');
+  vidEl.src = '';
+  document.getElementById(slot + '-drop').style.display = 'block';
+  document.getElementById(slot + '-player').style.display = 'none';
+  document.getElementById(slot + '-clear').style.display = 'none';
+  renderSlotThumbs(slot);
+  checkShowAnalysisSetup();
+}
+
+function scrubSlot(slot, val) {
+  const vid = document.getElementById(slot + '-video');
+  if (vid) vid.currentTime = parseFloat(val);
+}
+
+function checkShowAnalysisSetup() {
+  const hasAny = slots.yours.videoEl || slots.model.videoEl;
+  document.getElementById('analysis-setup').style.display = hasAny ? 'block' : 'none';
+  // Suggest gap analysis if both loaded
+  if (slots.yours.videoEl && slots.model.videoEl) {
+    setReadMode('compare');
+  }
+}
+
+// ── FRAME CAPTURE ──
+let pendingTag = { yours: null, model: null };
+
+function tagAndCapture(slot, label) {
+  pendingTag[slot] = label;
+  captureSlotFrame(slot);
+}
+
+function captureSlotFrame(slot) {
+  const vid = document.getElementById(slot + '-video');
+  if (!vid || !vid.src) return;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = vid.videoWidth || 640;
+  canvas.height = vid.videoHeight || 360;
+  canvas.getContext('2d').drawImage(vid, 0, 0, canvas.width, canvas.height);
+
+  const label = pendingTag[slot] || `Frame ${slots[slot].frames.length + 1}`;
+  pendingTag[slot] = null;
+
+  slots[slot].frames.push({
+    dataUrl: canvas.toDataURL('image/jpeg', 0.82),
+    label,
+    time: vid.currentTime
+  });
+  renderSlotThumbs(slot);
+}
+
+function removeSlotFrame(slot, idx) {
+  slots[slot].frames.splice(idx, 1);
+  renderSlotThumbs(slot);
+}
+
+function renderSlotThumbs(slot) {
+  const container = document.getElementById(slot + '-thumbs');
+  if (!container) return;
+  container.innerHTML = '';
+  slots[slot].frames.forEach((f, i) => {
+    const div = document.createElement('div');
+    div.className = 'slot-thumb';
+    div.innerHTML = `
+      <img src="${f.dataUrl}" alt="${f.label}">
+      <div class="thumb-label">${f.label}</div>
+      <div class="thumb-remove" onclick="event.stopPropagation();removeSlotFrame('${slot}',${i})">✕</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// ── DRAG & DROP ──
+function handleDragOver(e, dropId) {
+  e.preventDefault();
+  if (dropId) document.getElementById(dropId)?.classList.add('dragover');
+}
+
+function handleDragLeave(e, dropId) {
+  if (dropId) document.getElementById(dropId)?.classList.remove('dragover');
+}
+
+function handleDrop(e, slot) {
+  e.preventDefault();
+  const dropId = slot + '-drop';
+  document.getElementById(dropId)?.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('video/')) loadSlot(slot, file);
+}
+
+// ── CAMERA ──
+function toggleCameraPanel() {
+  const panel = document.getElementById('camera-panel');
+  const showing = panel.style.display !== 'none';
+  panel.style.display = showing ? 'none' : 'block';
+}
+
+async function startCamera() {
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false
+    });
+    const vid = document.getElementById('camera-preview');
+    vid.srcObject = cameraStream;
+    document.getElementById('cam-start-btn').style.display = 'none';
+    document.getElementById('cam-record-btn').style.display = 'block';
+    document.getElementById('cam-stop-btn').style.display = 'block';
+    document.getElementById('camera-status').textContent = 'Camera live — hit Record to capture your swing';
+  } catch(err) {
+    document.getElementById('camera-status').textContent = 'Camera access denied — use upload instead';
+  }
+}
+
+function toggleRecording() {
+  const btn = document.getElementById('cam-record-btn');
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+    recordedChunks = [];
+    mediaRecorder = new MediaRecorder(cameraStream, { mimeType: 'video/webm' });
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      stopCamera(false);
+      loadSlot('yours', new File([blob], 'recorded.webm', { type: 'video/webm' }));
+      document.getElementById('camera-panel').style.display = 'none';
+      document.getElementById('camera-status').textContent = 'Recorded — scrub and capture frames in Your Swing slot';
+    };
+    mediaRecorder.start();
+    btn.textContent = '⏹ Stop Recording';
+    btn.classList.add('recording');
+    document.getElementById('camera-status').textContent = '● Recording…';
+  } else {
+    mediaRecorder.stop();
+    btn.textContent = '⏺ Record';
+    btn.classList.remove('recording');
+  }
+}
+
+function stopCamera(hide = true) {
+  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  if (hide) {
+    document.getElementById('cam-start-btn').style.display = 'block';
+    document.getElementById('cam-record-btn').style.display = 'none';
+    document.getElementById('cam-stop-btn').style.display = 'none';
+  }
+}
+
+// ── READ MODE ──
+function setReadMode(mode) {
+  currentReadMode = mode;
+  ['cold','compare','targeted'].forEach(m => {
+    document.getElementById('mode-' + m)?.classList.toggle('active', m === mode);
+  });
+  document.getElementById('targeted-input-wrap').style.display = mode === 'targeted' ? 'block' : 'none';
+  document.getElementById('cold-read-note').style.display = mode === 'cold' ? 'block' : 'none';
+  document.getElementById('compare-note').style.display = mode === 'compare' ? 'block' : 'none';
+
+  const btnText = mode === 'cold' ? 'Show the Coach My Swing'
+    : mode === 'compare' ? 'Run Gap Analysis'
+    : 'Analyze My Swing';
+  document.getElementById('analyze-btn-text').textContent = btnText;
+}
+
+// ── ANALYSIS ──
+async function runSwingAnalysis() {
+  const yoursFrames = slots.yours.frames;
+  const modelFrames = slots.model.frames;
+  const hasYours = yoursFrames.length > 0;
+  const hasModel = modelFrames.length > 0;
+
+  if (!hasYours && !hasModel) {
+    alert('Capture at least one frame from your swing first.');
+    return;
+  }
+
+  const btn = document.getElementById('analyze-btn');
+  btn.disabled = true;
+  document.getElementById('analyze-btn-text').textContent = 'Coach is watching…';
+  document.getElementById('analysis-setup').style.display = 'none';
+  document.getElementById('analysis-results').style.display = 'block';
+  document.getElementById('results-loading').style.display = 'flex';
+  document.getElementById('results-content').innerHTML = '';
+  document.getElementById('results-followup').style.display = 'none';
+
+  // Build compare grid in results
+  const compareGrid = document.getElementById('results-compare-grid');
+  const singleFrames = document.getElementById('results-frames');
+
+  if (hasYours && hasModel) {
+    compareGrid.style.display = 'grid';
+    singleFrames.style.display = 'none';
+    compareGrid.innerHTML = `
+      <div>
+        <div class="compare-col-label">Your Swing</div>
+        <div class="compare-thumbs">${yoursFrames.map(f => `<div class="compare-thumb"><img src="${f.dataUrl}"><div class="ct-label">${f.label}</div></div>`).join('')}</div>
+      </div>
+      <div>
+        <div class="compare-col-label">Model Swing</div>
+        <div class="compare-thumbs">${modelFrames.map(f => `<div class="compare-thumb"><img src="${f.dataUrl}"><div class="ct-label">${f.label}</div></div>`).join('')}</div>
+      </div>
+    `;
+  } else {
+    compareGrid.style.display = 'none';
+    singleFrames.style.display = 'flex';
+    singleFrames.innerHTML = (hasYours ? yoursFrames : modelFrames).map(f =>
+      `<div class="results-frame-thumb"><img src="${f.dataUrl}" alt="${f.label}"></div>`
+    ).join('');
+  }
+
+  // Loading message
+  const loadingMsgs = {
+    cold: 'Reading your swing…',
+    compare: 'Comparing swings…',
+    targeted: 'Analyzing your progress…'
+  };
+  document.getElementById('results-loading-text').textContent = loadingMsgs[currentReadMode] || 'Reading…';
+
+  // Build program context
+  const phase = getPhase(state.week);
+  const drills = getCurrentDrills().map(d => d.name).join(', ');
+  const userContext = document.getElementById('analysis-context-input')?.value.trim() || '';
+  const programCtx = `Golfer: Week ${state.week}, Phase ${phase.num} (${phase.name}). Sessions logged: ${state.sessions.length}. Current drills: ${drills}.`;
+
+  // Build image blocks
+  const buildImgBlock = (f) => ({
+    type: 'image',
+    source: { type: 'base64', media_type: 'image/jpeg', data: f.dataUrl.split(',')[1] }
+  });
+
+  let messageContent = [];
+  let promptText = '';
+
+  if (currentReadMode === 'compare' && hasYours && hasModel) {
+    // Interleave frames: yours then model for each position
+    messageContent.push({ type: 'text', text: `YOUR SWING frames (${yoursFrames.map(f=>f.label).join(', ')}):` });
+    yoursFrames.forEach(f => messageContent.push(buildImgBlock(f)));
+    messageContent.push({ type: 'text', text: `MODEL SWING frames (${modelFrames.map(f=>f.label).join(', ')}):` });
+    modelFrames.forEach(f => messageContent.push(buildImgBlock(f)));
+
+    promptText = `${programCtx}
+
+I'm showing you two sets of swing frames — my swing and a model swing I want to pattern myself after.
+
+This is a gap analysis. I want you to:
+
+First, tell me specifically what the model is doing at each position that I am not. Not generalities — the precise mechanical differences. Shaft angle, hip position, arm structure, wrist conditions, weight distribution, spine angle — whatever the key deltas are.
+
+Second, identify which of those differences is the most important for ball striking. The one gap that, if I close it, changes the most.
+
+Third, tell me what that change needs to feel like from the inside — because what it looks like externally and what it feels like to the player are often completely different. Tell me the internal sensation.
+
+Fourth, give me the single constraint drill that most directly targets that primary gap.
+
+Do not soften this. Tell me exactly what you see.`;
+
+  } else if (currentReadMode === 'cold' && hasYours) {
+    yoursFrames.forEach(f => messageContent.push(buildImgBlock(f)));
+    promptText = `${programCtx}
+
+I'm sending you ${yoursFrames.length} frame(s) from my swing: ${yoursFrames.map(f=>f.label).join(', ')}.
+
+Come in with completely fresh eyes. Here is what I need:
+
+First — what kind of ball striker am I right now based on what you see? Be honest about what this swing produces and where it breaks down.
+
+Second — identify the single primary mechanical fault that is most limiting my ball striking. Trace where it starts in the sequence and what it does through impact.
+
+Third — any secondary faults that are real consequences worth knowing, not cosmetic issues.
+
+Fourth — the exact change I need to make. Not a list. The actual movement. What needs to feel different, where, and how I'll know when it's right.
+
+Fifth — one constraint drill that attacks the root cause directly.
+
+Tell me what you actually see.`;
+
+  } else if (currentReadMode === 'targeted') {
+    const allFrames = [...yoursFrames, ...modelFrames];
+    allFrames.forEach(f => messageContent.push(buildImgBlock(f)));
+    promptText = `${programCtx} The golfer says: "${userContext || 'no specific context'}"
+
+${allFrames.length} frame(s): ${allFrames.map(f=>f.label).join(', ')}.
+
+Is what they think they're working on actually the primary issue, or is something more foundational causing it? What specifically do these frames show relative to where the pattern needs to go? Is the change moving the right direction or is a compensation developing? Give them one adjustment that most accelerates the change.`;
+
+  } else {
+    // fallback — single video cold read
+    const frames = hasYours ? yoursFrames : modelFrames;
+    frames.forEach(f => messageContent.push(buildImgBlock(f)));
+    promptText = `${programCtx} Analyze these ${frames.length} swing frames and give me your honest assessment of the primary fault and what needs to change.`;
+  }
+
+  messageContent.push({ type: 'text', text: promptText });
+  analysisConversation = [{ role: 'user', content: messageContent }];
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1800,
+        system: COACH_SYSTEM,
+        messages: analysisConversation
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content?.[0]?.text || 'Could not read the frames. Try clearer images with better lighting.';
+    analysisConversation.push({ role: 'assistant', content: text });
+
+    document.getElementById('results-loading').style.display = 'none';
+    const content = document.getElementById('results-content');
+    content.innerHTML = '';
+
+    // Smart section headers
+    const sectionMap = currentReadMode === 'compare' ? [
+      { keys: ['model is doing', 'differences', 'deltas', 'what the model', 'model swing'], label: 'What The Model Does That You Don\'t' },
+      { keys: ['most important', 'primary gap', 'biggest difference', 'one gap'], label: 'The Primary Gap' },
+      { keys: ['feel', 'internal', 'sensation', 'inside'], label: 'What The Change Feels Like' },
+      { keys: ['drill', 'constraint', 'prescription'], label: 'Drill Prescription' },
+    ] : [
+      { keys: ['ball striker', 'produces', 'honest', 'what kind'], label: 'Ball Striking Assessment' },
+      { keys: ['primary fault', 'primary mechanical', 'most limiting', 'root cause'], label: 'Primary Fault' },
+      { keys: ['secondary', 'consequence'], label: 'Secondary Issues' },
+      { keys: ['exact change', 'actual movement', 'needs to feel', 'the change'], label: 'The Change' },
+      { keys: ['drill', 'constraint', 'prescription'], label: 'Drill Prescription' },
+    ];
+
+    const usedLabels = new Set();
+    text.split('\n\n').filter(Boolean).forEach(para => {
+      const lc = para.toLowerCase();
+      const match = sectionMap.find(s => !usedLabels.has(s.label) && s.keys.some(k => lc.includes(k)));
+      if (match) {
+        usedLabels.add(match.label);
+        const h = document.createElement('div');
+        h.className = 'results-section-head';
+        h.textContent = match.label;
+        content.appendChild(h);
+      }
+      const p = document.createElement('p');
+      p.innerHTML = para.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
+      content.appendChild(p);
+    });
+
+    document.getElementById('results-followup').style.display = 'block';
+
+  } catch(err) {
+    document.getElementById('results-loading').style.display = 'none';
+    document.getElementById('results-content').innerHTML =
+      '<p style="color:var(--muted);font-style:italic;">Could not connect. Check your connection and try again.</p>';
+  }
+
+  btn.disabled = false;
+  document.getElementById('analyze-btn-text').textContent = currentReadMode === 'compare' ? 'Run Gap Analysis' : currentReadMode === 'cold' ? 'Show the Coach My Swing' : 'Analyze My Swing';
+  document.getElementById('analysis-setup').style.display = 'block';
+}
+
+function resetAnalysis() {
+  slots.yours.frames = [];
+  slots.model.frames = [];
+  analysisConversation = [];
+  ['yours','model'].forEach(s => {
+    renderSlotThumbs(s);
+    clearSlot(s);
+  });
+  document.getElementById('analysis-results').style.display = 'none';
+  document.getElementById('analysis-setup').style.display = 'none';
+  const ctx = document.getElementById('analysis-context-input');
+  if (ctx) ctx.value = '';
+  setReadMode('cold');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+</script>
+</body>
+</html>
