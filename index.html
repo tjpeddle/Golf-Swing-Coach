@@ -2338,13 +2338,13 @@ let state = loadState() || JSON.parse(JSON.stringify(defaultState));
 
 // ── DATA ───────────────────────────────────────────────────────────────────
 const PHASES = [
-  { num: 1, name: 'Deconstruction', weeks: [1,2], wkRange: '1–2',
+  { num: 1, name: 'Deconstruction', weeks: [1,2], wkRange: '1-2',
     desc: 'Interrupt the old pattern. Build motor primitives. No ball 70% of the time.' },
-  { num: 2, name: 'Encoding', weeks: [3,4,5], wkRange: '3–5',
+  { num: 2, name: 'Encoding', weeks: [3,4,5], wkRange: '3-5',
     desc: 'Transfer the new pattern to ball-striking with progressive challenge.' },
-  { num: 3, name: 'Consolidation', weeks: [6,7,8,9,10], wkRange: '6–10',
+  { num: 3, name: 'Consolidation', weeks: [6,7,8,9,10], wkRange: '6-10',
     desc: 'Make the pattern robust under pressure. 70% course, 30% range.' },
-  { num: 4, name: 'Competition', weeks: [11,12,13,14,15,16], wkRange: '10–16',
+  { num: 4, name: 'Competition', weeks: [11,12,13,14,15,16], wkRange: '10-16',
     desc: 'Play golf. Trust the pattern. Routine is everything.' },
 ];
 
@@ -2382,12 +2382,12 @@ const SHOT_STEPS = [
     body: 'One swing. You are feeling the sensation of the new move — not checking positions. Feeling is cerebellar. Checking is cortical. One helps, one hurts.' },
   { num: 3, title: 'One Trigger Cue', keyword: 'CUE',
     body: 'Your single cue as you step in. Feeling-based or external — never positional. "Swing to the target" beats "keep the elbow in." This is your last conscious input.' },
-  { num: 4, title: 'Eyes on Target → Pull the Trigger', keyword: 'EXTERNAL',
+  { num: 4, title: 'Eyes on Target -> Pull the Trigger', keyword: 'EXTERNAL',
     body: 'Last thing your eyes see is the target. Not the ball. This activates external focus and suppresses internal (technical) processing.' },
   { num: 5, title: 'Execute & Release', keyword: 'TRUST',
     body: 'Zero swing thoughts during the motion. If a thought appears — let it pass like weather. Don\'t fight it, don\'t follow it.' },
   { num: 6, title: 'Post-Shot: Neutral Affect', keyword: 'NEUTRAL',
-    body: 'Good shot → move on. Bad shot → same. No post-swing analysis on the course. Frustration encodes failure patterns. Neutrality keeps the nervous system calm.' },
+    body: 'Good shot -> move on. Bad shot -> same. No post-swing analysis on the course. Frustration encodes failure patterns. Neutrality keeps the nervous system calm.' },
 ];
 
 const YN_QUESTIONS = [
@@ -2403,7 +2403,7 @@ const SCIENCE_CARDS = [
   { name: "Movement Variability (Bernstein)", text: "<strong>The brain learns movement categories, not exact positions.</strong> Practicing in varied conditions builds a robust, adaptable pattern — not a fragile one that only works on the range." },
   { name: "Sleep Consolidation", text: "<strong>Motor learning consolidates during deep sleep.</strong> Practicing before bed > practicing in the morning for new pattern acquisition. Every session you log is being processed overnight." },
   { name: "Amygdala Hijack", text: "<strong>Under pressure, your brain defaults to the most myelinated pathway — the old swing.</strong> The antidote is not willpower. It is a consistent pre-shot routine that triggers the cerebellum to take over before the amygdala intervenes." },
-  { name: "The Plateau Phenomenon", text: "<strong>Weeks 3–4 will feel worse.</strong> The old pattern is losing dominance but the new one isn't automatic yet. This is the crossing-over phase — the most important time to hold the course. Most golfers quit here and conclude the change 'doesn't work.' It is working." },
+  { name: "The Plateau Phenomenon", text: "<strong>Weeks 3-4 will feel worse.</strong> The old pattern is losing dominance but the new one isn't automatic yet. This is the crossing-over phase — the most important time to hold the course. Most golfers quit here and conclude the change 'doesn't work.' It is working." },
   { name: "Distributed vs. Massed Practice", text: "<strong>30 minutes every day beats 3.5 hours on Saturday.</strong> Distributed practice allows sleep consolidation between sessions. The nervous system needs recovery time to build new neural infrastructure." },
 ];
 
@@ -2411,7 +2411,7 @@ const MOTIVATIONS = [
   { text: "The change happens on the practice tee. On the course your only job is to trust it.", source: "On-Course Protocol" },
   { text: "You are not fighting your old swing. You are building a faster road beside it.", source: "Neuroscience Principle" },
   { text: "Frustration is information. Neutrality is strategy.", source: "Post-Shot Protocol" },
-  { text: "The plateau is proof it's working. Hold the course.", source: "Week 3–4 Warning" },
+  { text: "The plateau is proof it's working. Hold the course.", source: "Week 3-4 Warning" },
   { text: "Slow motion today is full speed in six weeks.", source: "Phase 1 Protocol" },
   { text: "Every rep at the right speed is myelin. You are literally building the new pattern.", source: "Hebb's Law" },
   { text: "Process is the metric right now. Score follows commitment.", source: "Scorecard Mindset" },
@@ -2484,7 +2484,7 @@ function renderDashboard() {
     const el = document.querySelector('.card:nth-child(3) .card-sub');
     if (el) el.textContent = 'until Phase ' + nextPhase.num;
   } else {
-    document.getElementById('stat-days').textContent = '∞';
+    document.getElementById('stat-days').textContent = 'inf';
     const el = document.querySelector('.card:nth-child(3) .card-sub');
     if (el) el.textContent = 'you\'re competing';
   }
@@ -2595,9 +2595,9 @@ function renderWeekControls() {
   div.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-top:8px;';
 
   div.innerHTML = `
-    <button onclick="changeWeek(-1)" style="background:var(--fairway);border:1px solid rgba(255,255,255,0.1);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;padding:8px 16px;border-radius:5px;cursor:pointer;letter-spacing:0.1em;transition:all 0.2s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--muted)'">← PREV WEEK</button>
+    <button onclick="changeWeek(-1)" style="background:var(--fairway);border:1px solid rgba(255,255,255,0.1);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;padding:8px 16px;border-radius:5px;cursor:pointer;letter-spacing:0.1em;transition:all 0.2s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--muted)'"><- PREV WEEK</button>
     <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.1em;">WEEK ${state.week} OF 16</span>
-    <button onclick="changeWeek(1)" style="background:var(--fairway);border:1px solid rgba(255,255,255,0.1);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;padding:8px 16px;border-radius:5px;cursor:pointer;letter-spacing:0.1em;transition:all 0.2s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--muted)'">NEXT WEEK →</button>
+    <button onclick="changeWeek(1)" style="background:var(--fairway);border:1px solid rgba(255,255,255,0.1);color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;padding:8px 16px;border-radius:5px;cursor:pointer;letter-spacing:0.1em;transition:all 0.2s;" onmouseover="this.style.color='var(--cream)'" onmouseout="this.style.color='var(--muted)'">NEXT WEEK -></button>
   `;
   container.appendChild(div);
 }
@@ -2790,7 +2790,7 @@ function renderProgress() {
     const dot = document.createElement('div');
     dot.className = 'week-dot ' + (w < state.week ? 'completed' : w === state.week ? 'current' : 'future');
     dot.innerHTML = `<div class="week-dot-label">${w}</div>`;
-    dot.title = 'Week ' + w + (hasSessions ? ' ✓' : '');
+    dot.title = 'Week ' + w + (hasSessions ? ' v' : '');
     if (hasSessions && w < state.week) dot.style.background = 'var(--gold)';
     dot.onclick = () => {
       state.week = w;
@@ -2998,7 +2998,7 @@ async function askCoach(prompt) {
       content.appendChild(sep);
       const qDiv = document.createElement('div');
       qDiv.style.cssText = 'font-family:"DM Mono",monospace;font-size:9px;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;';
-      qDiv.textContent = '↳ ' + drawerConversation[drawerConversation.length-2].content;
+      qDiv.textContent = '>> ' + drawerConversation[drawerConversation.length-2].content;
       content.appendChild(qDiv);
     }
 
@@ -3183,7 +3183,7 @@ function renderSlotThumbs(slot) {
     div.innerHTML = `
       <img src="${f.dataUrl}" alt="${f.label}">
       <div class="thumb-label">${f.label}</div>
-      <div class="thumb-remove" onclick="event.stopPropagation();removeSlotFrame('${slot}',${i})">✕</div>
+      <div class="thumb-remove" onclick="event.stopPropagation();removeSlotFrame('${slot}',${i})">x</div>
     `;
     container.appendChild(div);
   });
@@ -3245,12 +3245,12 @@ function toggleRecording() {
       document.getElementById('camera-status').textContent = 'Recorded — scrub and capture frames in Your Swing slot';
     };
     mediaRecorder.start();
-    btn.textContent = '⏹ Stop Recording';
+    btn.textContent = '[stop] Stop Recording';
     btn.classList.add('recording');
-    document.getElementById('camera-status').textContent = '● Recording…';
+    document.getElementById('camera-status').textContent = '* Recording...';
   } else {
     mediaRecorder.stop();
-    btn.textContent = '⏺ Record';
+    btn.textContent = '[rec] Record';
     btn.classList.remove('recording');
   }
 }
@@ -3294,7 +3294,7 @@ async function runSwingAnalysis() {
 
   const btn = document.getElementById('analyze-btn');
   btn.disabled = true;
-  document.getElementById('analyze-btn-text').textContent = 'Coach is watching…';
+  document.getElementById('analyze-btn-text').textContent = 'Coach is watching...';
   document.getElementById('analysis-setup').style.display = 'none';
   document.getElementById('analysis-results').style.display = 'block';
   document.getElementById('results-loading').style.display = 'flex';
@@ -3328,11 +3328,11 @@ async function runSwingAnalysis() {
 
   // Loading message
   const loadingMsgs = {
-    cold: 'Reading your swing…',
-    compare: 'Comparing swings…',
-    targeted: 'Analyzing your progress…'
+    cold: 'Reading your swing...',
+    compare: 'Comparing swings...',
+    targeted: 'Analyzing your progress...'
   };
-  document.getElementById('results-loading-text').textContent = loadingMsgs[currentReadMode] || 'Reading…';
+  document.getElementById('results-loading-text').textContent = loadingMsgs[currentReadMode] || 'Reading...';
 
   // Build program context
   const phase = getPhase(state.week);
