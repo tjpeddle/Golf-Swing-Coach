@@ -69,6 +69,15 @@ hr.gold{border:none;height:1px;background:rgba(200,168,75,0.2);margin:20px 0;}
 .motivation-text{font-family:'Playfair Display',serif;font-size:16px;font-style:italic;color:var(--cream);line-height:1.5;position:relative;}
 .motivation-src{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;margin-top:8px;}
 
+
+/* PHASE INSTRUCTIONS */
+.phase-instructions{background:var(--ink2);border:1px solid rgba(200,168,75,0.2);border-radius:10px;padding:16px;margin-bottom:14px;}
+.pi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.pi-item{background:var(--green);border-radius:7px;padding:10px 12px;}
+.pi-label{font-family:"DM Mono",monospace;font-size:7px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;margin-bottom:3px;}
+.pi-value{font-family:"DM Mono",monospace;font-size:11px;color:var(--gold);line-height:1.3;}
+.pi-howto{font-size:13px;color:var(--muted);font-style:italic;line-height:1.6;border-left:2px solid rgba(200,168,75,0.2);padding-left:10px;}
+
 /* DRILLS */
 .protocol-head{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--white);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
 .protocol-head::before{content:'';width:3px;height:18px;background:var(--gold);border-radius:2px;display:block;flex-shrink:0;}
@@ -238,6 +247,18 @@ input[type=range]{padding:4px 0;accent-color:var(--gold);}
     <div class="phase-lbl" id="pl2">Ph2 Encode</div>
     <div class="phase-lbl" id="pl3">Ph3 Consolidate</div>
     <div class="phase-lbl" id="pl4">Ph4 Compete</div>
+  </div>
+
+
+  <div class="phase-instructions" id="phase-instr">
+    <div class="pi-grid">
+      <div class="pi-item"><div class="pi-label">Sessions</div><div class="pi-value" id="pi-sessions">-</div></div>
+      <div class="pi-item"><div class="pi-label">Duration</div><div class="pi-value" id="pi-duration">-</div></div>
+      <div class="pi-item"><div class="pi-label">Days / Week</div><div class="pi-value" id="pi-days">-</div></div>
+      <div class="pi-item"><div class="pi-label">Best Time</div><div class="pi-value" id="pi-time">-</div></div>
+    </div>
+    <div class="pi-label" style="margin-bottom:6px;">How To Do It</div>
+    <div class="pi-howto" id="pi-howto">-</div>
   </div>
 
   <div class="plateau" id="plateau">
@@ -420,6 +441,42 @@ const PHASES = [
   { n:4, name:'Competition',    weeks:[11,12,13,14,15,16], desc:'Play golf. Trust the pattern. Routine is everything.' },
 ];
 
+
+const PHASE_INSTRUCTIONS = {
+  1: {
+    sessions: '1 session per day',
+    duration: '30-40 min',
+    time: 'Evening preferred - sleep consolidates overnight',
+    split: '70% no ball - 30% with ball',
+    howto: 'Do all 4 drills in sequence each session. Slow motion first to groove the new feel, mirror to encode it visually, constraint to make the old pattern impossible, pause-check to lock in the position. No more than 50 balls total. The ball is not the point yet - the pattern is.',
+    days: '6-7 days per week',
+  },
+  2: {
+    sessions: '1 session per day',
+    duration: '45-60 min',
+    time: 'Any time - consistency beats timing at this phase',
+    split: 'Session 1: Blocked range - Session 2: Random range - Session 3: On course or sim',
+    howto: 'Rotate the three session types across the week. Start each session with 10 slow-motion reps to activate the new pattern before hitting balls. Never more than 50 balls per range session. Get on the course or sim at least twice a week - transfer does not happen on the range alone.',
+    days: '5-6 days per week',
+  },
+  3: {
+    sessions: '1 session per day',
+    duration: '60-90 min',
+    time: 'Course or sim sessions can replace range sessions',
+    split: '70% course or sim - 30% range',
+    howto: 'Prioritize course play over range work this phase. On range days: change clubs every shot, time yourself at 20 seconds max per shot, no blocked practice. On course days: full pre-shot routine every shot, score is not the metric, note how often the new pattern shows up. Add speed training 2x per week.',
+    days: '5-6 days per week',
+  },
+  4: {
+    sessions: '1 session per day',
+    duration: 'Course rounds + short tune-up sessions',
+    time: 'Play as much as possible',
+    split: 'Play golf - short tune-up on range day before round if needed',
+    howto: 'Play competitive rounds. Before each round: 10 minutes on the range with your one cue, confirming the pattern feels accessible. On the course: full routine every shot, one cue only, neutral affect after every shot. Do not diagnose or work on swing mechanics during rounds. Score still not the primary metric - process is.',
+    days: '4-5 days per week',
+  },
+};
+
 const DRILLS = {
   1:[
     { id:'slow', name:'Slow-Motion Rehearsal', desc:'10% speed - eyes closed', reps:'20 reps' },
@@ -563,6 +620,16 @@ function renderDash() {
   const m = MOTIVATIONS[Math.floor(Date.now() / 86400000) % MOTIVATIONS.length];
   document.getElementById('mot-text').textContent = m.t;
   document.getElementById('mot-src').textContent = '- ' + m.s;
+
+  // Phase instructions
+  const pi = PHASE_INSTRUCTIONS[ph.n];
+  if (pi) {
+    document.getElementById('pi-sessions').textContent = pi.sessions;
+    document.getElementById('pi-duration').textContent = pi.duration;
+    document.getElementById('pi-days').textContent = pi.days;
+    document.getElementById('pi-time').textContent = pi.time;
+    document.getElementById('pi-howto').textContent = pi.howto;
+  }
 
   // Protocol title
   document.getElementById('proto-title').textContent = 'Phase ' + ph.n + ' - ' + ph.name + ' Protocol';
